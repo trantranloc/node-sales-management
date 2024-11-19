@@ -10,9 +10,6 @@ This project is an application for managing invoices and employees, built on Nod
 ```
 ├── models/               # MongoDB schema files
 ├── routes/               # Router files
-│   ├── BillRouter.js     # Handles invoice management
-│   ├── EmployeeRouter.js # Handles employee management
-│   └── Global.js         # General routes like login/logout
 ├── views/                # EJS templates for rendering UI
 ├── app.js                # Main application file
 ├── package.json          # Dependencies and project metadata
@@ -72,8 +69,7 @@ This project is an application for managing invoices and employees, built on Nod
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/your-repo-url.git
-   cd your-repo-folder
+   git clone https://github.com/Tran2612/shop-control.git
    ```
 
 2. **Install dependencies**:
@@ -102,4 +98,4 @@ This project is an application for managing invoices and employees, built on Nod
 ---
 
 ## Author
-This project is developed by **[Your Name or Team Name]**. For feedback or reporting issues, contact **[your email or GitHub link]**.
+This project is developed by **[Loc Tran Tran]**. For feedback or reporting issues, contact **[Tran26122003@gmail.com]**.
