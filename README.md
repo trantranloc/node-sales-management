@@ -10,6 +10,9 @@ This project is an application for managing invoices and employees, built on Nod
 ```
 ├── models/               # MongoDB schema files
 ├── routes/               # Router files
+│   ├── BillRouter.js     # Handles invoice management
+│   ├── EmployeeRouter.js # Handles employee management
+│   └── Global.js         # General routes like login/logout
 ├── views/                # EJS templates for rendering UI
 ├── app.js                # Main application file
 ├── package.json          # Dependencies and project metadata
@@ -22,4 +25,81 @@ This project is an application for managing invoices and employees, built on Nod
 ### 1. Invoice Management
 - **Route:** `/bills`
 - Displays a list of user-specific invoices.
-- Fetches invoice data from MongoDB using the `Bill` com]**.
+- Fetches invoice data from MongoDB using the `Bill` model.
+- Renders the UI using EJS templates.
+
+**Source Code:** [BillRouter.js](#)
+
+---
+
+### 2. Employee Management
+- **Route:** `/employees`
+- Features:
+  - Retrieve a list of employees.
+  - Add new employees with passwords hashed using `bcrypt`.
+  - Update employee details.
+  - View employee details.
+  - Delete employees.
+
+**Source Code:** [EmployeeRouter.js](#)
+
+---
+
+### 3. User Authentication (Login and Registration)
+- **Routes:**
+  - `/login`: Handles user login.
+  - `/register`: Displays the registration form.
+  - `/logout`: Ends the user session.
+- Session management using `express-session` to store user data.
+
+**Source Code:** [Global.js](#)
+
+---
+
+## System Requirements
+- **Node.js**: >=16.0.0
+- **MongoDB**: A NoSQL database for data storage.
+- **Key Dependencies**:
+  - `express`
+  - `bcrypt`
+  - `mongoose`
+  - `express-session`
+  - `ejs`
+
+---
+
+## Installation Guide
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/your-repo-url.git
+   cd your-repo-folder
+   ```
+
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
+
+3. **Start MongoDB** (if running locally):
+   ```bash
+   mongod
+   ```
+
+4. **Run the application**:
+   ```bash
+   npm start
+   ```
+
+5. **Access the application** at [http://localhost:3000](http://localhost:3000).
+
+---
+
+## Notes
+- **Database Configuration:** Update your MongoDB URI in the configuration file (e.g., `app.js` or `.env`).
+- **Auto-reload:** Use `nodemon` for better development experience.
+
+---
+
+## Author
+This project is developed by **[Your Name or Team Name]**. For feedback or reporting issues, contact **[your email or GitHub link]**.
