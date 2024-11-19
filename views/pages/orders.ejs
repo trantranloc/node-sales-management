@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giao diện Bán Hàng</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+    <style>
+        /* Phần giỏ hàng có thể cuộn */
+        .cart-container {
+            height: 70vh;
+            /* Chiều cao giới hạn cho phần giỏ hàng */
+            overflow-y: auto;
+            margin-bottom: 80px;
+            /* Giữ khoảng trống cho phần tổng tiền */
+        }
+
+        .product-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .product-info img {
+            width: 60px;
+            height: 60px;
+            margin-right: 15px;
+            object-fit: cover;
+        }
+
+        .quantity-control {
+            display: flex;
+            align-items: center;
+        }
+
+        .quantity-control button {
+            width: 35px;
+            height: 35px;
+            text-align: center;
+            font-size: 20px;
+        }
+
+        .product-total {
+            margin-left: 15px;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .total-summary {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        /* Cố định phần tổng tiền ở dưới cùng màn hình */
+        .fixed-summary {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #fff;
+            padding: 15px;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .fixed-summary .btn {
+            font-size: 1.1em;
+        }
+
+        /* Thiết kế ô tìm kiếm đẹp mắt */
+        .search-bar {
+            margin-bottom: 20px;
+        }
+
+        .search-bar input {
+            font-size: 1.1em;
+            padding: 10px;
+        }
+
+        .search-bar {
+            position: relative;
+            /* Đảm bảo kết quả tìm kiếm xuất hiện phía dưới thanh tìm kiếm */
+        }
+
+        .search-results {
+            position: absolute;
+            top: 100%;
+            /* Đảm bảo phần kết quả tìm kiếm xuất hiện ngay dưới thanh tìm kiếm */
+            left: 0;
+            right: 0;
+            width: 100%;
+            /* Chiếm toàn bộ chiều rộng của thanh tìm kiếm */
+            background-color: white;
+            border: 1px solid #ddd;
+            /* Viền mỏng cho kết quả tìm kiếm */
+            z-index: 100;
+            /* Đảm bảo nó xuất hiện trên các phần tử khác */
+            max-height: 300px;
+            /* Giới hạn chiều cao để có thể cuộn */
+            overflow-y: auto;
+            /* Cho phép cuộn dọc nếu danh sách quá dài */
+        }
+
+        .search-results li {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .search-results li:hover {
+            background-color: #f8f9fa;
+            /* Hiệu ứng hover cho mỗi mục */
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid mt-4">
+
+        <div class="row">
+            <!-- Tìm kiếm sản phẩm và khách hàng -->
+            <div class="col-12 col-md-8 search-bar position-relative">
+                <input type="text" name="q" class="form-control" placeholder="Tìm kiếm sản phẩm..."
+                    onkeyup="searchProducts(this.value)" id="search-box">
+                <!-- Kết quả tìm kiếm -->
+                <div id="search-results"
+                    class="shadow product-results search-results position-absolute w-100 bg-white border border-light mt-1 rounded">
+                </div>
+            </div>
+
+            <div class="col-12 col-md-4 search-bar d-flex gap-2">
+                <input type="text" class="form-control" placeholder="Tìm kiếm khách hàng..."
+                    onkeyup="searchCustomer(this.value)" aria-label="Tìm kiếm khách hàng">
+                <div id="search-result-customers"
+                    class="shadow product-results search-results position-absolute w-100 bg-white border border-light mt-1 rounded">
+                    <!-- hiện khách hàng  -->
+                </div>
+
+                <button class="btn btn-outline-secondary" data-bs-target="#addCustomerModal" data-bs-toggle="modal">
+                    <i class="fa fa-plus"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Giỏ hàng  -->
+        <div class="row  ">
+            <div class="col-md-8 cart-container border">
+                <!-- Danh sách sản phẩm trong giỏ hàng -->
+                <% orderItems.forEach((item)=> { %>
+                    <div class="product-card">
+                        <div class="product-info">
+                            <!-- Hình ảnh sản phẩm -->
+                            <img src="<%= item.productId.image %>" alt="<%= item.productId.name %>"
+                                style=" max-width: 100%;height: 80px;">
+                            <div>
+                                <!-- Tên sản phẩm -->
+                                <div><strong>
+                                        <%= item.productId.name %>
+                                    </strong></div>
+                                <!-- Giá sản phẩm -->
+                                <div>
+                                    <%= item.productId.price.toLocaleString() %>
+                                        VND
+                                </div>
+                            </div>
+                        </div>
+                        <div class="quantity-control d-flex">
+                            <!-- Giảm số lượng -->
+                            <form action="/orders/update/<%= item._id %>/<%= item.productId._id %>" method="POST"
+                                class="d-flex">
+                                <button type="submit" class="btn btn-outline-secondary btn-sm" name="action"
+                                    value="decrease">-</button>
+                                <input type="number" class="form-control mx-2" value="<%= item.quantity %>"
+                                    style="width: 50px;" readonly>
+                                <button type="submit" class="btn btn-outline-secondary btn-sm" name="action"
+                                    value="increase">+</button>
+                            </form>
+                        </div>
+                        <div class="product-total">
+                            <!-- Tổng giá cho sản phẩm này -->
+                            <span>
+                                <%= (item.productId.price * item.quantity).toLocaleString() %> VND
+                            </span>
+                        </div>
+                        <!-- Xóa sản phẩm khỏi giỏ -->
+                        <form action="/orders/remove-product/<%= orderId %>/<%= item.productId._id %>" method="POST">
+                            <button type="submit" class="btn btn-danger btn-sm">X</button>
+                        </form>
+                    </div>
+                    <% }); %>
+
+            </div>
+            <div class="col-md-4 cart-container border">
+                <div class="col-md-12 mt-2">
+                    <select class="form-select form-select-lg" name="role" id="role">
+                        <option value disabled selected>Khuyến mại</option>
+                        <option value="admin">Quản trị viên</option>
+                        <option value="manager">Quản lý</option>
+                        <option value="staff">Nhân viên</option>
+                        <option value="intern">Thực tập sinh</option>
+                    </select>
+                </div>
+                <% if (customer) { %> <!-- Kiểm tra nếu có khách hàng -->
+                    <!-- Thông tin khách hàng với biểu tượng xóa -->
+                    <div class="d-flex flex-column p-3 bg-light border rounded position-relative mt-2">
+                        <!-- Biểu tượng xóa -->
+                        <span class="position-absolute top-0 end-0 p-2 text-danger" style="cursor: pointer;">
+                            <i class="fas fa-times"></i>
+                        </span>
+
+                        <!-- Thông tin khách hàng -->
+                        <div class="mb-2">
+                            <p class="mb-0"><strong>Tên khách hàng:</strong>
+                                <%= customer.name %>
+                            </p>
+                        </div>
+                        <div class="mb-2">
+                            <p class="mb-0"><strong>Email:</strong>
+                                <%= customer.email %>
+                            </p>
+                        </div>
+                        <div class="mb-2">
+                            <p class="mb-0"><strong>Số điện thoại:</strong>
+                                <%= customer.phone %>
+                            </p>
+                        </div>
+                    </div>
+                    <% } else { %> <!-- Trường hợp không có khách hàng -->
+                        <div class="alert alert-warning mt-3" role="alert">
+                            Không tìm thấy thông tin khách hàng.
+                        </div>
+                        <% } %>
+
+
+            </div>
+
+            <!-- Tổng tiền và thanh toán -->
+            <div class="row">
+                <!-- Tổng tiền và thanh toán -->
+                <div class="col-12 position-fixed bottom-0 end-0 p-3 m-0">
+                    <div class="bg-white shadow-lg  rounded-3 border border-light">
+                        <div class=" text-center d-flex align-items-center justify-content-center ">
+                            <!-- Tổng đơn hàng -->
+                            <div class="col-8 me-5 align-items-center ">
+                                <p class="total-summary m-0 p-0 align-items-center d-flex justify-content-end">
+                                    <strong>Tổng Tiền: </strong>
+                                    <span class="p-2 m-4 border rounded-1" id="totalAmount">
+                                        <%= totalQuantity %>
+                                    </span>
+
+                                    <span id="totalAmount">
+                                        <%= totalPrice.toLocaleString() %>
+                                            VND
+                                    </span>
+                                </p>
+                            </div>
+
+                            <!-- Nút thanh toán -->
+                            <div class=" col-3 d-flex justify-content-around gap-2">
+                                <button class="btn btn-secondary w-100 m-1">Hủy</button>
+                                <button class="btn btn-success w-100 m-1" data-bs-target="#viewDetailOrderModal"
+                                    data-bs-toggle="modal">Thanh
+                                    Toán</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thanh toán -->
+    <div class="modal fade" id="viewDetailOrderModal" tabindex="-1" aria-labelledby="viewDetailOrderModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="viewDetailOrderModalLabel">Chi tiết đơn
+                        hàng</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="order-summary">
+                        <div class="row mb-3">
+                            <div class="col-6"><strong>Số sản
+                                    phẩm:</strong></div>
+                            <div class="col-6 text-end">
+                                <%= totalQuantity %>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-6"><strong>Giảm giá theo
+                                    %:</strong></div>
+                            <div class="col-6">
+                                <input type="number" class="form-control" id="discountPercentage"
+                                    name="discountPercentage" placeholder="Nhập giảm giá %" value="0">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-6"><strong>Giảm giá theo số
+                                    tiền:</strong></div>
+                            <div class="col-6">
+                                <input type="number" class="form-control" id="discountAmount" name="discountAmount"
+                                    placeholder="Nhập giảm giá (VND)" value="0">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-6"><strong>Tổng
+                                    tiền:</strong></div>
+                            <div class="col-6 text-end text-danger" id="totalAmount">
+                                <%= totalPrice.toLocaleString() %> VND
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="payment-method">
+                        <h6>Phương thức thanh toán:</h6>
+                        <div class="d-flex justify-content-between mb-3">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="paymentMethod" id="paymentMethodCash"
+                                    value="cash">
+                                <label class="form-check-label" for="paymentMethodCash">Tiền mặt</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="paymentMethod"
+                                    id="paymentMethodBankTransfer" value="bankTransfer">
+                                <label class="form-check-label" for="paymentMethodBankTransfer">Chuyển
+                                    khoản ngân
+                                    hàng</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="paymentMethod" id="paymentMethodCard"
+                                    value="card">
+                                <label class="form-check-label" for="paymentMethodCard">Thẻ tín
+                                    dụng</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-primary" form="checkoutForm">Xác nhận thanh toán</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form thanh toán -->
+    <form id="checkoutForm" action="orders/checkout" method="POST">
+        <!-- Các input hidden hoặc thông tin cần thiết -->
+        <input type="hidden" name="orderId" value="<%= orderId %>">
+        <select name="paymentMethod" required>
+            <option value="cash">Thanh toán tiền mặt</option>
+            <option value="bankTransfer">Chuyển khoản ngân hàng</option>
+            <option value="card">Thẻ tín dụng</option>
+        </select>
+        <input type="submit" value="Thanh toán">
+    </form>
+
+    <!-- Thêm khách hàng  -->
+    <div class="modal fade" id="addCustomerModal" tabindex="-1" aria-labelledby="addCustomerModalLabel">
+        <div class="modal-dialog modal-dialog-scrollable modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addCustomerModalLabel">Thêm
+                        khách hàng</h5>
+                </div>
+                <div class="modal-body">
+                    <form action="/customers/add" method="post">
+                        <div class="row mb-3 ">
+                            <div class="col-6">
+                                <strong class="m-2">Tên khách hàng</strong>
+                                <input type="text" class="form-control" name="name">
+                            </div>
+                            <div class="col-6">
+                                <strong class="m-2">Số điện thoại</strong>
+                                <input type="text" class="form-control" name="phone">
+                            </div>
+                        </div>
+                        <div class="row mb-3 ">
+                            <div class="col-6">
+                                <strong class="m-2">Email</strong>
+                                <input type="text" class="form-control" name="email">
+                            </div>
+                        </div>
+                        <!-- Nút hành động -->
+                        <div class="text-end p-4">
+                            <button data-bs-dismiss="modal" class="btn btn-secondary">Hủy</button>
+                            <button type="submit" class="btn btn-primary">Thêm sản
+                                phẩm</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        async function searchProducts(query) {
+            const resultContainerProduct = document.getElementById('search-results');
+            if (!query.trim()) return (resultContainerProduct.innerHTML = '');
+
+            try {
+                const response = await fetch(`/orders/search?q=${query}`);
+                const products = await response.json();
+                resultContainerProduct.innerHTML = products.length
+                    ? products.map(product => `
+                    <li class="p-3 border-bottom d-flex justify-content-between align-items-center"
+                        onclick="submitOrder('${product._id}')">
+                        <div>
+                            <img src="${product.image}" width="60px" height="60px"/>
+                            <b>${product.name}</b>
+                            <span class="text-muted">${product.code}</span>
+                        </div>
+                        <span class="text-success">${product.price} VND</span>
+                    </li>`).join('')
+                    : '<p class="p-2">Không có sản phẩm nào khớp với từ khóa tìm kiếm.</p>';
+            } catch (error) {
+                console.error('Lỗi khi tìm kiếm:', error);
+            }
+        }
+
+        function submitOrder(productId) {
+            const form = document.createElement('form');
+            form.action = `/orders/add/${productId}`;
+            form.method = 'POST';
+            form.innerHTML = '<input type="hidden" name="quantity" value="1">';
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+
+        async function searchCustomer(query) {
+            const resultContainerCustomer = document.getElementById('search-result-customers');
+            if (!query.trim()) return (resultContainerCustomer.innerHTML = '');
+
+            try {
+                const response = await fetch(`/customers/search?q=${query}`);
+                const customers = await response.json();
+                resultContainerCustomer.innerHTML = customers.length
+                    ? customers.map(customer => `
+                    <li class="p-3 border-bottom d-flex justify-content-between align-items-center">
+                    <div>
+                        <b>${customer.name}</b>
+                        <span class="text-muted">${customer.phone || 'Không có số điện thoại'}</span>
+                    </div>
+                    <span class="text-muted">${customer.email || 'Không có email'}</span>
+                    <a href="/orders/customer-add-order/${customer._id}" class="btn">
+                        <i class="fa fa-plus"></i>
+                    </a>
+                </li>`).join('')
+                    : '<p class="p-2">Không có khách hàng nào khớp với từ khóa tìm kiếm.</p>';
+            } catch (error) {
+                console.error('Lỗi khi tìm kiếm khách hàng:', error);
+            }
+        }
+
+
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

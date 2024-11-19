@@ -1,0 +1,70 @@
+<div class="m-5">
+    <h3 class="text-center text-primary mb-4">Sửa thông tin nhân viên</h3>
+    <form action="/employees/update/<%= employee.id %>" method="post" id="editEmployeeForm">
+        <!-- Thông tin cơ bản -->
+        <h6 class="text-primary mb-3">Thông tin cơ bản</h6>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="name" class="form-label">Họ và Tên</label>
+                <input type="text" class="form-control form-control-lg" name="name" id="name"
+                    placeholder="Nhập họ và tên" value="<%= employee.name %>" required>
+            </div>
+            <div class="col-md-6">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control form-control-lg" name="email" id="email"
+                    placeholder="Nhập email" value="<%= employee.email %>" required>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="phone" class="form-label">Số điện thoại</label>
+                <input type="text" class="form-control form-control-lg" name="phone" id="phone"
+                    placeholder="Nhập số điện thoại" value="<%= employee.phone %>" required>
+            </div>
+            <div class="col-md-6">
+                <label for="address" class="form-label">Địa chỉ</label>
+                <input type="text" class="form-control form-control-lg" name="address" id="address"
+                    placeholder="Nhập địa chỉ" value="<%= employee.address %>" required>
+            </div>
+        </div>
+
+        <!-- Thông tin công việc -->
+        <h6 class="text-primary mb-3">Thông tin công việc</h6>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="position" class="form-label">Vị trí</label>
+                <input type="text" class="form-control form-control-lg" name="position" id="position"
+                    placeholder="Nhập vị trí làm việc" value="<%= employee.position %>" required>
+            </div>
+            <div class="col-md-6">
+                <label for="shift" class="form-label">Ca làm việc</label>
+                <input type="text" class="form-control form-control-lg" name="shift" id="shift"
+                    placeholder="Nhập ca làm việc" value="<%= employee.shift %>" required>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="salary" class="form-label">Lương cơ bản</label>
+                <input type="text" class="form-control form-control-lg" name="salary" id="salary"
+                    placeholder="Nhập lương cơ bản" value="<%= employee.salary %>" required>
+            </div>
+            <div class="col-md-6">
+                <label for="role" class="form-label">Quyền nhân viên</label>
+                <select class="form-select form-select-lg" name="role" id="role" required>
+                    <option value="" disabled>Chọn quyền</option>
+                    <option value="admin" <%=employee.role==='admin' ? 'selected' : '' %>>Quản trị viên</option>
+                    <option value="manager" <%=employee.role==='manager' ? 'selected' : '' %>>Quản lý</option>
+                    <option value="staff" <%=employee.role==='staff' ? 'selected' : '' %>>Nhân viên</option>
+                    <option value="intern" <%=employee.role==='intern' ? 'selected' : '' %>>Thực tập sinh</option>
+                </select>
+            </div>
+        </div>
+
+
+        <!-- Nút hành động -->
+        <div class="text-end">
+            <a href="/employees" class="btn btn-secondary">Hủy</a>
+            <button type="submit" class="btn btn-primary">Cập nhật thông tin</button>
+        </div>
+    </form>
+</div>

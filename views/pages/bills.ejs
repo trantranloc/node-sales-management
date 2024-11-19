@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch sử Đơn Hàng</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Cải thiện kiểu dáng bảng */
+        .table th,
+        .table td {
+            vertical-align: middle;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .order-details {
+            display: none;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+        }
+
+        .filter-container {
+            margin-bottom: 20px;
+        }
+
+        .filter-container input {
+            border-radius: 10px;
+        }
+
+        .btn-detail {
+            color: white;
+            background-color: #007bff;
+        }
+
+        .btn-detail:hover {
+            background-color: #0056b3;
+        }
+
+        .order-item-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .order-item-time {
+            color: #888;
+        }
+
+        .table-container {
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            background-color: #ffffff;
+        }
+
+        .card-header {
+            background-color: #f7f7f7;
+            padding: 10px 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class=" m-4">
+
+        <!-- Lọc đơn hàng -->
+        <div class="filter-container">
+            <div class="row mb-4">
+                <!-- Lọc theo thời gian -->
+                <div class="col-md-4">
+                    <label for="orderTime" class="form-label">Lọc theo Thời gian</label>
+                    <input type="date" class="form-control" id="orderTime">
+                </div>
+                <!-- Tìm kiếm mã đơn hàng -->
+                <div class="col-md-4">
+                    <label for="orderIdSearch" class="form-label">Tìm Mã Đơn Hàng</label>
+                    <input type="text" class="form-control" id="orderIdSearch" placeholder="Nhập mã đơn hàng">
+                </div>
+                <!-- Tìm kiếm số điện thoại -->
+                <div class="col-md-4">
+                    <label for="phoneSearch" class="form-label">Tìm Số Điện Thoại</label>
+                    <input type="text" class="form-control" id="phoneSearch" placeholder="Nhập số điện thoại">
+                </div>
+            </div>
+        </div>
+
+        <!-- Bảng Lịch sử Đơn Hàng -->
+        <div class="table-container">
+            <div class="card-header">
+                Danh sách đơn hàng
+            </div>
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">Mã Đơn Hàng</th>
+                        <th scope="col">Thời gian</th>
+                        <th scope="col">Khách hàng</th>
+                        <th scope="col">Phương thức thanh toán</th>
+                        <th scope="col">Tổng tiền</th>
+                        <th scope="col">Chi tiết</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Đơn hàng 1 -->
+                    <tr data-bs-toggle="collapse" href="#order1" aria-expanded="false" aria-controls="order1">
+                        <td>#1</td>
+                        <td>01/11/2024</td>
+                        <td>Nguyễn Văn A</td>
+                        <td>Chuyển khoản</td>
+                        <td>350,000 VND</td>
+                        <td><button class="btn btn-detail btn-sm" data-bs-toggle="modal"
+                                data-bs-target="#viewDetailBillModal">Chi tiết</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- Hiển thị chi tiết đơn hàng   -->
+    <div class="modal fade" id="viewDetailBillModal" tabindex="-1" aria-labelledby="viewDetailBillModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered  modal-lg">
+            <div class="modal-content">
+                <!-- Header -->
+                <div class="modal-header">
+                    <div class="w-100 text-center">
+                        <h5 class="modal-title text-uppercase fw-bold" id="viewDetailBillModalLabel">Cửa hàng Ryon</h5>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <!-- Body -->
+                <div class="modal-body">
+                    <!-- Thông tin chung -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Người bán:</strong> [Tên người bán]</p>
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            <p class="mb-1"><strong>Thời gian:</strong> [Thời gian giao dịch]</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Phương thức thanh toán:</strong> [Phương thức]</p>
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            <p class="mb-1"><strong>Tên khách hàng:</strong> [Tên khách hàng]</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <p class="mb-1"><strong>Địa điểm:</strong> [Địa điểm]</p>
+                        </div>
+                    </div>
+
+                    <!-- Danh sách sản phẩm -->
+                    <div class="table-responsive mb-3" style="max-height: 300px; overflow-y: auto;">
+                        <table class="table table-bordered table-hover">
+                            <thead class="table-light text-center">
+                                <tr>
+                                    <th>Mã sản phẩm</th>
+                                    <th>Tên sản phẩm</th>
+                                    <th>Số lượng</th>
+                                    <th>Thành tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Dòng mẫu -->
+                                <tr>
+                                    <td>[Mã]</td>
+                                    <td>[Tên sản phẩm]</td>
+                                    <td>[Số lượng]</td>
+                                    <td>[Thành tiền]</td>
+                                </tr>
+                                <tr>
+                                    <td>[Mã]</td>
+                                    <td>[Tên sản phẩm]</td>
+                                    <td>[Số lượng]</td>
+                                    <td>[Thành tiền]</td>
+                                </tr>
+
+
+                                <!-- Thêm nhiều dòng hơn ở đây -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Tổng kết -->
+                    <div class="d-flex flex-column">
+                        <div class="col d-flex justify-content-between">
+                            <strong>Tổng tiền:</strong>
+                            <p>[Tổng tiền]</p>
+                        </div>
+                        <div class="col d-flex justify-content-between">
+                            <strong>Tổng tiền:</strong>
+                            <p>[Tổng tiền]</p>
+                        </div>
+                        <div class="col d-flex justify-content-between">
+                            <strong>Tổng tiền:</strong>
+                            <p>[Tổng tiền]</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

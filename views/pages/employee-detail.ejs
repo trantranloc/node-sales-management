@@ -1,0 +1,126 @@
+<!-- employee-detail.ejs -->
+<div class="container mt-5">
+    <!-- Card hiển thị thông tin nhân viên -->
+    <div class="card shadow-lg">
+        <div class="card-header bg-info text-white">
+            <h4 class="mb-0">
+                <a href="/orders" class="btn btn-close"></a>
+                Thông tin cá nhân
+            </h4>
+        </div>
+        <div class="card-body">
+            <!-- Bảng hiển thị thông tin nhân viên -->
+            <table class="table table-bordered table-striped">
+                <tbody>
+                    <tr>
+                        <th scope="row">Họ và tên</th>
+                        <td>
+                            <%= employee.name %>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Email</th>
+                        <td>
+                            <%= employee.email %>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Số điện thoại</th>
+                        <td>
+                            <%= employee.phone %>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Địa chỉ</th>
+                        <td>
+                            <%= employee.address %>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Chức vụ</th>
+                        <td>
+                            <%= employee.position %>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Ca làm việc</th>
+                        <td>
+                            <%= employee.shift %>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Ngày bắt đầu</th>
+                        <td>
+                            <%= employee.startDate.toLocaleDateString() %>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Lương</th>
+                        <td>
+                            <%= employee.salary %>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Vai trò</th>
+                        <td>
+                            <%= employee.role %>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Mật khẩu</th>
+                        <td>
+                            <%= employee.password %>
+                                <button data-bs-toggle="modal" data-bs-target="#changePasswordModal<%= employee._id %>"
+                                    class="btn btn-link btn-sm">Thay đổi mật khẩu</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class=" text-center d-flex justify-content-end ">
+                <a href="/employees/update/<%= employee._id %>" class="btn btn-warning">Thay đổi thông tin</a>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Form để thay đổi mật khẩu  -->
+<div class="modal fade" id="changePasswordModal<%= employee._id %>" tabindex="-1"
+    aria-labelledby="changePasswordModal<%= employee._id %>" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content w-100">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewEmployeeModalLabel<%= employee._id %>">Thông tin chi tiết nhân
+                    viên
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- change-password.ejs -->
+                <div class="container">
+                    <form action="/employees/change-password/<%= employee._id %>" method="POST">
+                        <!-- Mật khẩu mới -->
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Mật khẩu mới</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+
+                        <!-- Xác nhận mật khẩu -->
+                        <div class="mb-3">
+                            <label for="confirm-password" class="form-label">Xác nhận mật khẩu mới</label>
+                            <input type="password" class="form-control" id="confirm-password" name="confirm-password"
+                                required>
+                        </div>
+
+                        <!-- Nút submit -->
+                        <button type="submit" class="btn btn-primary">Cập nhật mật khẩu</button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Optional: Bootstrap JS (Include if needed for functionality like dropdown, modals, etc.) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>

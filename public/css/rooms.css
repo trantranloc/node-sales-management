@@ -1,0 +1,35 @@
+/* Customize Bootstrap components if necessary */
+.room-card img {
+    height: 180px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.room-card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.card-body {
+    background-color: #fff;
+    padding: 20px;
+}
+
+.card-footer {
+    background-color: #f8f9fa;
+    border-top: 1px solid #ddd;
+    padding: 10px;
+}
+
+.btn-primary,
+.btn-danger,
+.btn-warning {
+    border-radius: 5px;
+}
+
+.modal-header,
+.modal-footer {
+    background-color: #007bff;
+    color: white;
+}
