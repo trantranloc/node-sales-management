@@ -92,35 +92,25 @@ router.get('/search', async (req, res) => {
 // Route: Xóa sản phẩm khỏi giỏ hàng
 router.post('/remove-product/:orderId/:productId', isAuthenticated, async (req, res) => {
     try {
-        const { orderId, productId } = req.params; // Lấy orderId và productId từ params
-
-        // Tìm đơn hàng theo orderId
+        const { orderId, productId } = req.params;
         const order = await Order.findById(orderId);
 
         if (!order) {
             return res.status(404).send('Đơn hàng không tồn tại.');
         }
-
-        // Tìm sản phẩm trong orderItems
         const productIndex = order.orderItems.findIndex(item => item.productId.toString() === productId);
 
         if (productIndex === -1) {
             return res.status(404).send('Sản phẩm không có trong đơn hàng.');
         }
-
-        // Xóa sản phẩm khỏi orderItems
         order.orderItems.splice(productIndex, 1);
-        await order.save(); // Lưu thay đổi vào đơn hàng
-
-        // Redirect về trang giỏ hàng
+        await order.save(); 
         res.redirect('/orders');
     } catch (err) {
         console.error('Error removing product from order:', err);
         res.status(500).send('Có lỗi xảy ra khi xóa sản phẩm.');
     }
 });
-
-
 
 // Route: Thêm sản phẩm vào giỏ hàng
 router.post('/add/:id', isAuthenticated, async (req, res) => {
@@ -174,27 +164,44 @@ router.post('/add/:id', isAuthenticated, async (req, res) => {
     }
 });
 
-
 // Route: Thêm khách hàng vào đơn hàng
 router.get('/customer-add-order/:customerId', isAuthenticated, async (req, res) => {
     try {
         const { customerId } = req.params;
         const employeeId = req.session.employeeId;
 
-        // Tìm đơn hàng của nhân viên đang đăng nhập
         const orderE = await Order.findOne({ employeeId });
-        console.log(orderE._id);  // In ID của đơn hàng để kiểm tra
+        // console.log(orderE._id);  
 
-        // Kiểm tra sự tồn tại của khách hàng
-        const customer = await Customer.findById(customerId);
-        if (!customer) {
-            return res.status(404).json({ message: 'Khách hàng không tồn tại' });
+        const order = await Order.findByIdAndUpdate(
+            orderE._id, 
+            { customerId },
+            { new: true }
+        );
+
+        if (!order) {
+            return res.status(404).json({ message: 'Không tìm thấy đơn hàng để cập nhật' });
         }
 
-        // Cập nhật customerId cho đơn hàng
+        res.redirect('/orders')
+    } catch (error) {
+        console.error('Error updating order:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+// Route: Xóa khách hàng khỏi đơn hàng
+router.get('/customer-remove-order/:customerId', isAuthenticated, async (req, res) => {
+    try {
+        const { customerId } = req.params;
+        const employeeId = req.session.employeeId;
+
+        const orderE = await Order.findOne({ employeeId });
+        // console.log(orderE._id);  
+
         const order = await Order.findByIdAndUpdate(
-            orderE._id,  // Dùng orderE._id thay cho orderId
-            { customerId },
+            orderE._id, 
+            { customerId : null },
             { new: true }
         );
 

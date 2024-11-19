@@ -17,8 +17,6 @@
                     <th>STT</th>
                     <th>Họ và Tên</th>
                     <th>Email</th>
-                    <th>Vị trí</th>
-                    <th>Ca làm việc</th>
                     <th>Số điện thoại</th>
                     <th>Thao tác</th>
                 </tr>
@@ -35,12 +33,7 @@
                         <td>
                             <%= employee.email %>
                         </td>
-                        <td>
-                            <%= employee.position %>
-                        </td>
-                        <td>
-                            <%= employee.shift %>
-                        </td>
+
                         <td>
                             <%= employee.phone %>
                         </td>
@@ -101,18 +94,7 @@
                                         <%= employee.email %>
                                     </td>
                                 </tr>
-                                <tr>
-                                    <th scope="row">Vị trí</th>
-                                    <td>
-                                        <%= employee.position %>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">Ca làm việc</th>
-                                    <td>
-                                        <%= employee.shift %>
-                                    </td>
-                                </tr>
+
                                 <tr>
                                     <th scope="row">Số điện thoại</th>
                                     <td>
@@ -199,18 +181,7 @@
 
                                 <!-- Thông tin công việc -->
                                 <h6 class="text-primary mb-3">Thông tin công việc</h6>
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label for="position" class="form-label">Vị trí</label>
-                                        <input type="text" class="form-control form-control-lg" name="position"
-                                            id="position" placeholder="Nhập vị trí làm việc" required>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label for="shift" class="form-label">Ca làm việc</label>
-                                        <input type="text" class="form-control form-control-lg" name="shift" id="shift"
-                                            placeholder="Nhập ca làm việc" required>
-                                    </div>
-                                </div>
+
                                 <div class="row mb-3">
                                     <!-- <div class="col-md-6">
                                         <label for="startDate" class="form-label">Ngày bắt đầu làm việc</label>

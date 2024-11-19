@@ -23,7 +23,7 @@ router.get('/', async (req, res) => {
 router.post('/add', async (req, res) => {
     try {
         const {
-            name, email, password = "123456", phone, address, position, shift, salary, role
+            name, email, password = "123456", phone, address, salary, role
         } = req.body;
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -33,8 +33,6 @@ router.post('/add', async (req, res) => {
             password: hashedPassword,
             phone,
             address,
-            position,
-            shift,
             startDate: new Date(),
             salary,
             role
