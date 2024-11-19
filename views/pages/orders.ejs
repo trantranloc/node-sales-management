@@ -289,26 +289,39 @@
                             </div>
                         </div>
                         <div class="row mb-3">
-                            <div class="col-6"><strong>Giảm giá theo
-                                    %:</strong></div>
+                            <div class="col-6"><strong>Giảm giá theo %:</strong></div>
                             <div class="col-6">
-                                <input type="number" class="form-control" id="discountPercentage"
-                                    name="discountPercentage" placeholder="Nhập giảm giá %" value="0">
+                                <input type="number" class="form-control" id="discountPercentage" name="discountPercentage"
+                                    placeholder="Nhập giảm giá %" value="" oninput="checkDiscountPercentage()">
+                                <!-- Thay đổi id của error-message thành error-message-percentage -->
+                                <div id="error-message-percentage" class="mt-1" style="display: none;">
+                                    <p class="col-12 text-danger text-center p-1 rounded" style="border: solid 1px red;">
+                                        Phải bé hơn 100%
+                                    </p>
+                                </div>
                             </div>
                         </div>
+                        
                         <div class="row mb-3">
-                            <div class="col-6"><strong>Giảm giá theo số
-                                    tiền:</strong></div>
+                            <div class="col-6"><strong>Giảm giá theo số tiền:</strong></div>
                             <div class="col-6">
                                 <input type="number" class="form-control" id="discountAmount" name="discountAmount"
-                                    placeholder="Nhập giảm giá (VND)" value="0">
+                                    placeholder="Nhập giảm giá (VND)" value="" oninput="checkDiscountAmount()">
+                                <!-- Thay đổi id của error-message thành error-message-amount -->
+                                <div id="error-message-amount" class="mt-1" style="display: none;">
+                                    <p class="col-12 text-danger text-center p-1 rounded" style="border: solid 1px red;">
+                                        Phải bé hơn tổng tiền
+                                    </p>
+                                </div>
                             </div>
                         </div>
+
                         <div class="row mb-3">
                             <div class="col-6"><strong>Tổng
                                     tiền:</strong></div>
                             <div class="col-6 text-end text-danger" id="totalAmount">
                                 <%= totalPrice.toLocaleString() %> VND
+                                    <div id="totalPriceData" data-total-price="<%= totalPrice %>"></div>
                             </div>
                         </div>
                     </div>
@@ -347,17 +360,20 @@
         </div>
     </div>
 
-    <!-- Form thanh toán -->
-    <form id="checkoutForm" action="orders/checkout" method="POST">
-        <!-- Các input hidden hoặc thông tin cần thiết -->
-        <input type="hidden" name="orderId" value="<%= orderId %>">
-        <select name="paymentMethod" required>
-            <option value="cash">Thanh toán tiền mặt</option>
-            <option value="bankTransfer">Chuyển khoản ngân hàng</option>
-            <option value="card">Thẻ tín dụng</option>
-        </select>
-        <input type="submit" value="Thanh toán">
-    </form>
+<!-- Form thanh toán -->
+<form id="checkoutForm" action="orders/checkout" method="POST">
+    <!-- Các input hidden hoặc thông tin cần thiết -->
+    <input type="hidden" name="orderId" value="<%= orderId %>">
+
+    <!-- Dropdown chọn phương thức thanh toán -->
+    <select name="paymentMethod" required>
+        <option value="cash" selected>Thanh toán tiền mặt</option> <!-- Tiền mặt mặc định được chọn -->
+        <option value="bankTransfer">Chuyển khoản ngân hàng</option>
+        <option value="card">Thẻ tín dụng</option>
+    </select>
+
+    <input type="submit" value="Thanh toán">
+</form>
 
     <!-- Thêm khách hàng  -->
     <div class="modal fade" id="addCustomerModal" tabindex="-1" aria-labelledby="addCustomerModalLabel">
@@ -460,6 +476,32 @@
         }
 
 
+    </script>
+    <script>
+        // Hàm kiểm tra Giảm giá theo %
+        function checkDiscountPercentage() {
+            const discountPercentage = parseFloat(document.getElementById('discountPercentage').value);
+            const errorMessage = document.getElementById('error-message-percentage');
+
+            if (discountPercentage > 100) {
+                errorMessage.style.display = 'block'; // Hiển thị thông báo lỗi nếu giảm giá > 100%
+            } else {
+                errorMessage.style.display = 'none'; // Ẩn thông báo lỗi nếu giảm giá <= 100%
+            }
+        }
+
+        // Hàm kiểm tra Giảm giá theo số tiền
+        function checkDiscountAmount() {
+            const discountAmount = parseFloat(document.getElementById('discountAmount').value);
+            const totalPrice = parseFloat('<%= totalPrice %>'); // Lấy giá trị totalPrice từ EJS
+            const errorMessageAmount = document.getElementById('error-message-amount');
+
+            if (discountAmount > totalPrice) {
+                errorMessageAmount.style.display = 'block'; // Hiển thị thông báo lỗi nếu giảm giá > tổng tiền
+            } else {
+                errorMessageAmount.style.display = 'none'; // Ẩn thông báo lỗi nếu giảm giá <= tổng tiền
+            }
+        }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>

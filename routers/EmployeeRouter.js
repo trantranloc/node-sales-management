@@ -2,14 +2,15 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const Employee = require('../models/Employee');
+const isAuthenticated = require('../middlewares/authMiddleware');
 
-// Helper function to handle errors
+// Helper function for handling errors
 const handleError = (res, error, message = 'Đã xảy ra lỗi', statusCode = 500) => {
     console.error(error);
     res.status(statusCode).send(message);
 };
 
-// GET: Lấy danh sách nhân viên
+// Route: Lấy danh sách nhân viên
 router.get('/', async (req, res) => {
     try {
         const employees = await Employee.find();
@@ -19,7 +20,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-// POST: Thêm nhân viên mới
+// Route: Thêm nhân viên mới
 router.post('/add', async (req, res) => {
     try {
         const {
@@ -45,7 +46,7 @@ router.post('/add', async (req, res) => {
     }
 });
 
-// GET: Xóa nhân viên
+// Route: Xóa nhân viên
 router.get('/delete/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -60,7 +61,7 @@ router.get('/delete/:id', async (req, res) => {
     }
 });
 
-// GET: Hiển thị form sửa nhân viên
+// Route: Hiển thị form sửa nhân viên
 router.get('/update/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -74,7 +75,7 @@ router.get('/update/:id', async (req, res) => {
     }
 });
 
-// POST: Cập nhật thông tin nhân viên
+// Route: Cập nhật thông tin nhân viên
 router.post('/update/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -94,7 +95,7 @@ router.post('/update/:id', async (req, res) => {
     }
 });
 
-// GET: Xem thông tin chi tiết nhân viên
+// Route: Xem thông tin chi tiết nhân viên
 router.get('/detail/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -105,6 +106,28 @@ router.get('/detail/:id', async (req, res) => {
         res.render('layout', { content: 'pages/employee-detail', employee });
     } catch (error) {
         handleError(res, error, 'Lỗi khi tìm nhân viên');
+    }
+});
+
+// Route: Thay đổi mật khẩu
+router.post('/change-password/:employeeId' ,isAuthenticated, async (req, res) => {
+    try {
+        const { employeeId } = req.params; // Lấy employeeId từ URL params
+        const { currentPassword, newPassword } = req.body; // Nhận dữ liệu từ body request
+
+        // Kiểm tra mật khẩu hiện tại
+        const isPasswordMatch = await bcrypt.compare(currentPassword, employee.password);
+        if (!isPasswordMatch) {
+            return res.status(400).send('Mật khẩu hiện tại không đúng');
+        }
+        // Hash mật khẩu mới và cập nhật
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        employee.password = hashedPassword;
+        await employee.save();
+
+        res.redirect(`/employees/detail/${employeeId}`);
+    } catch (err) {
+        handleError(res, err, 'Lỗi khi thay đổi mật khẩu');
     }
 });
 

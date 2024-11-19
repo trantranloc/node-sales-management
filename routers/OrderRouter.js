@@ -3,14 +3,7 @@ const router = express.Router();
 const Order = require('../models/Order');
 const Product = require('../models/Product');
 const Bill = require('../models/Bill');
-const Customer = require('../models/Customer');
-
-
-// Middleware: Kiểm tra đăng nhập
-function isAuthenticated(req, res, next) {
-    if (!req.session.employeeId) return res.redirect('/login'); // Kiểm tra session
-    next();
-}
+const isAuthenticated = require('../middlewares/authMiddleware')
 
 // Hàm tiện ích: Tính tổng giá trị và số lượng giỏ hàng
 function calculateCartTotals(orderItems) {
@@ -104,7 +97,7 @@ router.post('/remove-product/:orderId/:productId', isAuthenticated, async (req, 
             return res.status(404).send('Sản phẩm không có trong đơn hàng.');
         }
         order.orderItems.splice(productIndex, 1);
-        await order.save(); 
+        await order.save();
         res.redirect('/orders');
     } catch (err) {
         console.error('Error removing product from order:', err);
@@ -174,7 +167,7 @@ router.get('/customer-add-order/:customerId', isAuthenticated, async (req, res) 
         // console.log(orderE._id);  
 
         const order = await Order.findByIdAndUpdate(
-            orderE._id, 
+            orderE._id,
             { customerId },
             { new: true }
         );
@@ -200,8 +193,8 @@ router.get('/customer-remove-order/:customerId', isAuthenticated, async (req, re
         // console.log(orderE._id);  
 
         const order = await Order.findByIdAndUpdate(
-            orderE._id, 
-            { customerId : null },
+            orderE._id,
+            { customerId: null },
             { new: true }
         );
 
@@ -218,27 +211,40 @@ router.get('/customer-remove-order/:customerId', isAuthenticated, async (req, re
 
 
 // Route: Xử lý thanh toán
-router.post('/checkout', isAuthenticated, async (req, res) => {
+router.post('/change-password/:employeeId', async (req, res) => {
     try {
+        const { employeeId } = req.params; // Lấy employeeId từ URL params
+        const { currentPassword, newPassword, confirmPassword } = req.body; // Nhận dữ liệu từ body request
 
-        // Tạo hóa đơn mới
-        const bill = new Bill({
-            employeeId,
-            customerId: order.customerId,
-            orderId: order._id,
-            totalAmount,
-            paymentMethod: req.body.paymentMethod,
-            // paymentStatus: 'completed',
-        });
+        const employee = await Employee.findById(employeeId);
+        if (!employee) {
+            return res.status(404).send('Nhân viên không tồn tại');
+        }
 
-        await bill.save(); // Lưu hóa đơn vào cơ sở dữ liệu
+        // Kiểm tra mật khẩu hiện tại
+        const isPasswordMatch = await bcrypt.compare(currentPassword, employee.password);
+        if (!isPasswordMatch) {
+            req.flash('error', 'Mật khẩu hiện tại không đúng');
+            return res.redirect(`/employees/change-password/${employeeId}`);
+        }
 
-        res.redirect('/orders');
+        // Kiểm tra mật khẩu mới và xác nhận
+        if (newPassword !== confirmPassword) {
+            req.flash('error', 'Mật khẩu mới và xác nhận mật khẩu mới không khớp');
+            return res.redirect(`/employees/change-password/${employeeId}`);
+        }
+
+        // Hash mật khẩu mới và cập nhật
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        employee.password = hashedPassword;
+        await employee.save();
+
+        res.redirect(`/employees/detail/${employeeId}`);
     } catch (err) {
-        console.error('Error during checkout:', err);
-        res.status(500).send('Có lỗi khi thanh toán.');
+        handleError(res, err, 'Lỗi khi thay đổi mật khẩu');
     }
 });
+
 
 
 
