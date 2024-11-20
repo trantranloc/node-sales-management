@@ -211,37 +211,65 @@ router.get('/customer-remove-order/:customerId', isAuthenticated, async (req, re
 
 
 // Route: Xử lý thanh toán
-router.post('/change-password/:employeeId', async (req, res) => {
+router.post('/checkout', isAuthenticated, async (req, res) => {
     try {
-        const { employeeId } = req.params; // Lấy employeeId từ URL params
-        const { currentPassword, newPassword, confirmPassword } = req.body; // Nhận dữ liệu từ body request
+        const employeeId = req.session?.employeeId;
+        let paymentMethod = req.body.paymentMethod;
+        const discountPercentage = parseFloat(req.body.discountPercentage) || 0;
+        const discountAmount = parseFloat(req.body.discountAmount) || 0;
+        let discount = 0;
 
-        const employee = await Employee.findById(employeeId);
-        if (!employee) {
-            return res.status(404).send('Nhân viên không tồn tại');
+
+        // Lấy đơn hàng từ database
+        const order = await Order.findOne({ employeeId }).populate({
+            path: 'orderItems.productId',
+            model: 'Product',
+        });
+
+        if (!order) {
+            return res.status(404).json({ message: 'Không tìm thấy đơn hàng để thanh toán' });
         }
 
-        // Kiểm tra mật khẩu hiện tại
-        const isPasswordMatch = await bcrypt.compare(currentPassword, employee.password);
-        if (!isPasswordMatch) {
-            req.flash('error', 'Mật khẩu hiện tại không đúng');
-            return res.redirect(`/employees/change-password/${employeeId}`);
+        let totalAmount = order.totalAmount;
+
+        if (discountPercentage > 0 && discountPercentage < 100) {
+            discount = totalAmount * (discountPercentage / 100);
+            totalAmount -= discount;
+        } else if (discountPercentage >= 100) {
+            return res.status(400).json({ message: 'Giảm giá theo phần trăm phải nhỏ hơn 100%' });
         }
 
-        // Kiểm tra mật khẩu mới và xác nhận
-        if (newPassword !== confirmPassword) {
-            req.flash('error', 'Mật khẩu mới và xác nhận mật khẩu mới không khớp');
-            return res.redirect(`/employees/change-password/${employeeId}`);
+        if (discountAmount > 0 && discountAmount < totalAmount) {
+            totalAmount -= discountAmount;
+            discount += discountAmount; // Cộng vào giá trị giảm giá tổng
+        } else if (discountAmount >= totalAmount) {
+            return res.status(400).json({ message: 'Giảm giá theo số tiền phải nhỏ hơn tổng tiền' });
         }
 
-        // Hash mật khẩu mới và cập nhật
-        const hashedPassword = await bcrypt.hash(newPassword, 10);
-        employee.password = hashedPassword;
-        await employee.save();
+        const lastBillCode = await Bill.findOne().sort({ code: -1 });
+        const codeBill = lastBillCode ? lastBillCode.code + 1 : 1000;
+        // Tạo hóa đơn
+        await Bill.create({
+            employeeId: order.employeeId,
+            customerId: order.customerId,
+            items: order.orderItems.map(item => ({
+                productId: item.productId._id, // Lấy ID sản phẩm
+                quantity: item.quantity,
+                price: item.price,
+            })),
+            paymentMethod: paymentMethod,
+            totalAmount: totalAmount,
+            discount: discount,
+            code: codeBill,
+            createdAt: new Date(),
+        });
 
-        res.redirect(`/employees/detail/${employeeId}`);
+        await Order.deleteOne({ _id: order._id });
+
+        res.redirect('/bills');
     } catch (err) {
-        handleError(res, err, 'Lỗi khi thay đổi mật khẩu');
+        console.error('Error processing checkout:', err);
+        res.status(500).json({ message: 'Đã có lỗi xảy ra khi xử lý thanh toán' });
     }
 });
 
