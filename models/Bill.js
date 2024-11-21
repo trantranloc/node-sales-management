@@ -6,8 +6,8 @@ const billSchema = new mongoose.Schema({
     customerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Customer' },
     items: [{
         productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
-        quantity: { type: Number, required: true, min: 1 },
-        price: { type: Number, required: true },
+        quantity: { type: Number, min: 1 },
+        price: { type: Number  },
     }],
     paymentMethod: { type: String, enum: ['cash', 'card', 'online'], default: 'cash' },
     totalAmount: { type: Number },
