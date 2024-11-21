@@ -73,23 +73,34 @@
         <!-- Lọc đơn hàng -->
         <div class="filter-container">
             <div class="row mb-4">
+
                 <!-- Lọc theo thời gian -->
-                <div class="col-md-4">
-                    <label for="orderTime" class="form-label">Lọc theo Thời gian</label>
-                    <input type="date" class="form-control" id="orderTime">
+                <div class="col-md-6">
+                    <form method="GET" action="/bills">
+                        <!-- <label for="selectedDate" class="form-label">Lọc theo Thời gian</label> -->
+                        <div class="d-flex">
+                            <input type="date" name="selectedDate" class="form-control" id="orderTime"
+                                value="<%= selectedDate %>">
+                            <button class="btn btn-primary ms-2" type="submit">
+                                <i class="fas fa-search"></i>
+                        </div>
+                    </form>
                 </div>
+
                 <!-- Tìm kiếm mã đơn hàng -->
-                <div class="col-md-4">
-                    <label for="orderIdSearch" class="form-label">Tìm Mã Đơn Hàng</label>
-                    <input type="text" class="form-control" id="orderIdSearch" placeholder="Nhập mã đơn hàng">
+                <div class="col-md-6">
+                    <!-- <label for="orderIdSearch" class="form-label">Tìm Mã Đơn Hàng</label> -->
+                    <div class="d-flex">
+                        <input type="text" class="form-control" id="orderIdSearch" placeholder="Nhập mã đơn hàng">
+                        <button class="btn btn-outline-primary ms-2" type="button" id="searchBtn">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
                 </div>
-                <!-- Tìm kiếm số điện thoại -->
-                <div class="col-md-4">
-                    <label for="phoneSearch" class="form-label">Tìm Số Điện Thoại</label>
-                    <input type="text" class="form-control" id="phoneSearch" placeholder="Nhập số điện thoại">
-                </div>
+
             </div>
         </div>
+
 
         <!-- Bảng Lịch sử Đơn Hàng -->
         <div class="table-container">
@@ -108,115 +119,179 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Đơn hàng 1 -->
-                    <tr data-bs-toggle="collapse" href="#order1" aria-expanded="false" aria-controls="order1">
-                        <td>#1</td>
-                        <td>01/11/2024</td>
-                        <td>Nguyễn Văn A</td>
-                        <td>Chuyển khoản</td>
-                        <td>350,000 VND</td>
-                        <td><button class="btn btn-detail btn-sm" data-bs-toggle="modal"
-                                data-bs-target="#viewDetailBillModal">Chi tiết</button></td>
-                    </tr>
+                    <!-- Đơn hàng -->
+                    <% bills.sort((a, b)=> b.code - a.code);
+                        %>
+                        <% bills.forEach((bill)=> { %>
+                            <tr data-bs-toggle="collapse" aria-expanded="false">
+                                <td>
+                                    #<%= bill.code %>
+                                </td> <!-- Số thứ tự đơn hàng -->
+                                <td>
+                                    <%= bill.createdAt.toLocaleTimeString() %>
+                                </td> <!-- Ngày tạo đơn hàng -->
+                                <td>
+                                    <% if(bill.customerId && bill.customerId.name) { %>
+                                        <%= bill.customerId.name %>
+                                            <% } else { %>
+                                                Khách hàng
+                                                <% } %>
+
+
+                                </td> <!-- Tên khách hàng -->
+                                <td>
+                                    <% if(bill.paymentMethod==='cash' ){ %>
+                                        Tiền mặt
+                                        <% } else if(bill.paymentMethod==='online' ){ %>
+                                            Chuyển khoản
+                                            <% } else { %>
+                                                Thẻ
+                                                <% } %>
+                                </td> <!-- Phương thức thanh toán -->
+                                <td>
+                                    <%= bill.totalAmount.toLocaleString() %> VND
+                                </td> <!-- Tổng số tiền -->
+                                <td>
+                                    <button class="btn btn-detail btn-sm" data-bs-toggle="modal"
+                                        data-bs-target="#viewDetailBillModal" data-bill-id="<%= bill._id %>">Chi
+                                        tiết</button>
+                                </td>
+                            </tr>
+                            <% }) %>
+
                 </tbody>
             </table>
         </div>
     </div>
     <!-- Hiển thị chi tiết đơn hàng   -->
-    <div class="modal fade" id="viewDetailBillModal" tabindex="-1" aria-labelledby="viewDetailBillModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered  modal-lg">
-            <div class="modal-content">
-                <!-- Header -->
-                <div class="modal-header">
-                    <div class="w-100 text-center">
-                        <h5 class="modal-title text-uppercase fw-bold" id="viewDetailBillModalLabel">Cửa hàng Ryon</h5>
-                    </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
+    <% bills.forEach((bill)=> { %>
 
-                <!-- Body -->
-                <div class="modal-body">
-                    <!-- Thông tin chung -->
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <p class="mb-1"><strong>Người bán:</strong> [Tên người bán]</p>
+        <div class="modal fade" id="viewDetailBillModal" tabindex="-1" aria-labelledby="viewDetailBillModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable   modal-lg">
+                <div class="modal-content">
+                    <!-- Header -->
+                    <div class="modal-header">
+                        <div class="w-100 text-center">
+                            <h5 class="modal-title text-uppercase fw-bold" id="viewDetailBillModalLabel">Cửa hàng Ryon
+                            </h5>
                         </div>
-                        <div class="col-md-6 text-md-end">
-                            <p class="mb-1"><strong>Thời gian:</strong> [Thời gian giao dịch]</p>
-                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
 
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <p class="mb-1"><strong>Phương thức thanh toán:</strong> [Phương thức]</p>
+                    <!-- Body -->
+                    <div class="modal-body">
+                        <!-- Thông tin chung -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Người bán:</strong>
+                                    <%= bill.employeeId.name %>
+                                </p>
+                            </div>
+                            <div class="col-md-6 text-md-end">
+                                <p class="mb-1"><strong>Thời gian:</strong>
+                                    <%= bill.createdAt.toLocaleDateString() %>
+                                </p>
+                            </div>
                         </div>
-                        <div class="col-md-6 text-md-end">
-                            <p class="mb-1"><strong>Tên khách hàng:</strong> [Tên khách hàng]</p>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Phương thức :</strong>
+                                    <% if(bill.paymentMethod==='cash' ){ %>
+                                        Tiền mặt
+                                        <% } else if(bill.paymentMethod==='online' ){ %>
+                                            Chuyển khoản
+                                            <% } else { %>
+                                                Thẻ
+                                                <% } %>
+                                </p>
+                            </div>
+                            <div class="col-md-6 text-md-end">
+                                <p class="mb-1"><strong>Tên khách hàng:</strong>
+                                    <% if(bill.customerId && bill.customerId.name) { %>
+                                        <%= bill.customerId.name %>
+                                            <% } else { %>
+                                                Khách hàng
+                                                <% } %>
+                                </p>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="row mb-3">
-                        <div class="col-md-12">
-                            <p class="mb-1"><strong>Địa điểm:</strong> [Địa điểm]</p>
+                        <!-- <div class="row mb-3">
+                            <div class="col-md-12">
+                                <p class="mb-1"><strong>Địa điểm:</strong> [Địa điểm]</p>
+                            </div>
+                        </div> -->
+
+                        <!-- Danh sách sản phẩm -->
+                        <div class="table-responsive mb-3" style="max-height: 300px; overflow-y: auto;">
+                            <table class="table table-bordered table-hover">
+                                <thead class="table-light text-center">
+                                    <tr>
+                                        <th>Mã sản phẩm</th>
+                                        <th>Tên sản phẩm</th>
+                                        <th>Số lượng</th>
+                                        <th>Thành tiền</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Dòng mẫu -->
+                                    <% bill.items.forEach(item=>{ %>
+                                        <tr>
+                                            <td>
+                                                <%= item.productId ? item.productId.code : 'N/A' %>
+                                            </td>
+                                            <td>
+                                                <%= item.productId ? item.productId.name : 'Không có' %>
+                                            </td>
+                                            <td>
+                                                <%= item.quantity %>
+                                            </td>
+                                            <td>
+                                                <%= item.quantity * item.price %> VND
+                                            </td>
+                                        </tr>
+                                        <% }) %>
+
+
+                                            <!-- Thêm nhiều dòng hơn ở đây -->
+                                </tbody>
+                            </table>
                         </div>
-                    </div>
 
-                    <!-- Danh sách sản phẩm -->
-                    <div class="table-responsive mb-3" style="max-height: 300px; overflow-y: auto;">
-                        <table class="table table-bordered table-hover">
-                            <thead class="table-light text-center">
-                                <tr>
-                                    <th>Mã sản phẩm</th>
-                                    <th>Tên sản phẩm</th>
-                                    <th>Số lượng</th>
-                                    <th>Thành tiền</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Dòng mẫu -->
-                                <tr>
-                                    <td>[Mã]</td>
-                                    <td>[Tên sản phẩm]</td>
-                                    <td>[Số lượng]</td>
-                                    <td>[Thành tiền]</td>
-                                </tr>
-                                <tr>
-                                    <td>[Mã]</td>
-                                    <td>[Tên sản phẩm]</td>
-                                    <td>[Số lượng]</td>
-                                    <td>[Thành tiền]</td>
-                                </tr>
+                        <!-- Tổng kết -->
+                        <div class="d-flex flex-column">
+                            <div class="col d-flex justify-content-between">
+                                <strong>Số tiền :</strong>
+                                <p>
+                                    <%= (bill.totalAmount + bill.discount).toLocaleString() %> VNĐ
+                                </p>
+                            </div>
+                            <div class="col d-flex justify-content-between">
+                                <strong>Giảm giá :</strong>
+                                <p>
+                                    <%= (bill.discount).toLocaleString() %> VNĐ
+                                </p>
+                            </div>
+                            <div class="col d-flex justify-content-between">
+                                <strong>Tổng tiền :</strong>
+                                <p>
+                                    <%= (bill.totalAmount).toLocaleString() %> VNĐ
+                                </p>
+                            </div>
 
 
-                                <!-- Thêm nhiều dòng hơn ở đây -->
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Tổng kết -->
-                    <div class="d-flex flex-column">
-                        <div class="col d-flex justify-content-between">
-                            <strong>Tổng tiền:</strong>
-                            <p>[Tổng tiền]</p>
-                        </div>
-                        <div class="col d-flex justify-content-between">
-                            <strong>Tổng tiền:</strong>
-                            <p>[Tổng tiền]</p>
-                        </div>
-                        <div class="col d-flex justify-content-between">
-                            <strong>Tổng tiền:</strong>
-                            <p>[Tổng tiền]</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+        <% }) %>
 
 
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

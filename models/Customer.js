@@ -4,9 +4,8 @@ const customerSchema = new mongoose.Schema({
     name: { type: String },
     email: {
         type: String,
-        required: true,
-        unique: true
-    }, phone: { type: String },
+    },
+    phone: { type: String },
     purchase: { type: Number, default: 0, min: 0 },
     discount: { type: Number, default: 0, min: 0 },
     total: { type: Number, default: 0, min: 0 },
