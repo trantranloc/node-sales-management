@@ -1,14 +1,11 @@
 const express = require("express");
 const mongoose = require('mongoose');
-const bodyParser = require('body-parser')
 const session = require('express-session')
 const app = express();
 const path = require('path');
 const fs = require('fs');
-const flash = require('connect-flash');
 
 const port = 3000;
-app.use(flash());
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -49,7 +46,6 @@ const productRouter = require('./routers/ProductRouter');
 const orderRouter = require('./routers/OrderRouter');
 const customerTouter = require('./routers/CustomerRouter');
 const billRouter = require('./routers/BillRouter');
-// const paymentRouter = require('./routers/payment')
 
 app.use('/', indexRouter);
 app.use('/employees', employeeRouter);

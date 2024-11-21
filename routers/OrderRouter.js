@@ -156,6 +156,66 @@ router.post('/add/:id', isAuthenticated, async (req, res) => {
         res.status(500).send('Có lỗi xảy ra khi thêm sản phẩm vào giỏ hàng.');
     }
 });
+// Route: Cộng 1 sản phẩm vào giỏ hàng
+router.post('/increase/:id', async (req, res) => {
+    try {
+        const employeeId = req.session.employeeId;
+        const productId = req.params.id;
+
+        // Tìm đơn hàng của nhân viên
+        let order = await Order.findOne({ employeeId });
+
+        if (!order) {
+            return res.status(404).send('Đơn hàng không tồn tại.');
+        }
+
+        // Tìm sản phẩm trong orderItems
+        const item = order.orderItems.find(item => item.productId.toString() === productId);
+
+        if (item) {
+            item.quantity += 1;
+        } else {
+            return res.status(404).send('Sản phẩm không tồn tại trong đơn hàng.');
+        }
+
+        await order.save();
+        res.redirect('/orders');
+    } catch (e) {
+        console.error('Error increasing product quantity:', e);
+        res.status(500).send('Có lỗi xảy ra khi tăng số lượng sản phẩm.');
+    }
+});
+// Route: Trừ 1 sản phẩm vào giỏ hàng
+router.post('/decrease/:id', async (req, res) => {
+    try {
+        const employeeId = req.session.employeeId;
+        const productId = req.params.id;
+
+        // Tìm đơn hàng của nhân viên
+        let order = await Order.findOne({ employeeId });
+
+        if (!order) {
+            return res.status(404).send('Đơn hàng không tồn tại.');
+        }
+
+        // Tìm sản phẩm trong orderItems
+        const item = order.orderItems.find(item => item.productId.toString() === productId);
+
+        if (item) {
+            item.quantity -= 1;
+        } else {
+            return res.status(404).send('Sản phẩm không tồn tại trong đơn hàng.');
+        }
+
+        await order.save();
+        res.redirect('/orders');
+    } catch (e) {
+        console.error('Error increasing product quantity:', e);
+        res.status(500).send('Có lỗi xảy ra khi tăng số lượng sản phẩm.');
+    }
+});
+
+
 
 // Route: Thêm khách hàng vào đơn hàng
 router.get('/customer-add-order/:customerId', isAuthenticated, async (req, res) => {
@@ -209,7 +269,6 @@ router.get('/customer-remove-order/:customerId', isAuthenticated, async (req, re
     }
 });
 
-
 // Route: Xử lý thanh toán
 router.post('/checkout', isAuthenticated, async (req, res) => {
     try {
@@ -218,7 +277,6 @@ router.post('/checkout', isAuthenticated, async (req, res) => {
         const discountPercentage = parseFloat(req.body.discountPercentage) || 0;
         const discountAmount = parseFloat(req.body.discountAmount) || 0;
         let discount = 0;
-
 
         // Lấy đơn hàng từ database
         const order = await Order.findOne({ employeeId }).populate({
@@ -241,7 +299,7 @@ router.post('/checkout', isAuthenticated, async (req, res) => {
 
         if (discountAmount > 0 && discountAmount < totalAmount) {
             totalAmount -= discountAmount;
-            discount += discountAmount; // Cộng vào giá trị giảm giá tổng
+            discount += discountAmount;
         } else if (discountAmount >= totalAmount) {
             return res.status(400).json({ message: 'Giảm giá theo số tiền phải nhỏ hơn tổng tiền' });
         }
@@ -253,7 +311,7 @@ router.post('/checkout', isAuthenticated, async (req, res) => {
             employeeId: order.employeeId,
             customerId: order.customerId,
             items: order.orderItems.map(item => ({
-                productId: item.productId._id, // Lấy ID sản phẩm
+                productId: item.productId._id,
                 quantity: item.quantity,
                 price: item.price,
             })),
@@ -264,19 +322,28 @@ router.post('/checkout', isAuthenticated, async (req, res) => {
             createdAt: new Date(),
         });
 
-        await Order.deleteOne({ _id: order._id });
+        // Giảm số lượng tồn kho của sản phẩm
+        for (let item of order.orderItems) {
+            const product = item.productId;
+            const quantityPurchased = item.quantity;
 
-        res.redirect('/bills');
+            if (product.stock < quantityPurchased) {
+                return res.status(400).json({ message: `Sản phẩm ${product.name} không đủ số lượng trong kho` });
+            }
+
+            // Giảm số lượng tồn kho của sản phẩm
+            product.stock -= quantityPurchased;
+
+            // Cập nhật lại thông tin sản phẩm trong cơ sở dữ liệu
+            await product.save();
+        }
+
+        await Order.deleteOne({ _id: order._id });
+        res.redirect('/orders');
     } catch (err) {
         console.error('Error processing checkout:', err);
         res.status(500).json({ message: 'Đã có lỗi xảy ra khi xử lý thanh toán' });
     }
 });
-
-
-
-
-
-
 
 module.exports = router;
