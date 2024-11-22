@@ -3,7 +3,8 @@ const router = express.Router();
 const Order = require('../models/Order');
 const Product = require('../models/Product');
 const Bill = require('../models/Bill');
-const isAuthenticated = require('../middlewares/authMiddleware')
+const isAuthenticated = require('../middlewares/authMiddleware');
+const Customer = require('../models/Customer');
 
 // Hàm tiện ích: Tính tổng giá trị và số lượng giỏ hàng
 function calculateCartTotals(orderItems) {
@@ -66,7 +67,7 @@ router.get('/', isAuthenticated, async (req, res) => {
 });
 
 // Route: Tìm kiếm sản phẩm
-router.get('/search', async (req, res) => {
+router.get('/search', isAuthenticated, async (req, res) => {
     const searchQuery = req.query.q || '';
     try {
         const products = await Product.find({
@@ -157,7 +158,7 @@ router.post('/add/:id', isAuthenticated, async (req, res) => {
     }
 });
 // Route: Cộng 1 sản phẩm vào giỏ hàng
-router.post('/increase/:id', async (req, res) => {
+router.post('/increase/:id', isAuthenticated, async (req, res) => {
     try {
         const employeeId = req.session.employeeId;
         const productId = req.params.id;
@@ -186,7 +187,7 @@ router.post('/increase/:id', async (req, res) => {
     }
 });
 // Route: Trừ 1 sản phẩm vào giỏ hàng
-router.post('/decrease/:id', async (req, res) => {
+router.post('/decrease/:id', isAuthenticated, async (req, res) => {
     try {
         const employeeId = req.session.employeeId;
         const productId = req.params.id;
@@ -218,8 +219,6 @@ router.post('/decrease/:id', async (req, res) => {
         res.status(500).send('Có lỗi xảy ra khi tăng số lượng sản phẩm.');
     }
 });
-
-
 
 // Route: Thêm khách hàng vào đơn hàng
 router.get('/customer-add-order/:customerId', isAuthenticated, async (req, res) => {
@@ -334,13 +333,16 @@ router.post('/checkout', isAuthenticated, async (req, res) => {
             if (product.stock < quantityPurchased) {
                 return res.status(400).json({ message: `Sản phẩm ${product.name} không đủ số lượng trong kho` });
             }
-
-            // Giảm số lượng tồn kho của sản phẩm
             product.stock -= quantityPurchased;
-
-            // Cập nhật lại thông tin sản phẩm trong cơ sở dữ liệu
             await product.save();
         }
+        const customer = await Customer.findById(order.customerId);
+        if (customer) {
+            customer.purchase += 1;
+            customer.total += totalAmount;
+            await customer.save();
+        }
+
 
         await Order.deleteOne({ _id: order._id });
         res.redirect('/orders');

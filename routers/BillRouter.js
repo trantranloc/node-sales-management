@@ -5,10 +5,10 @@ const Bill = require('../models/Bill');
 const isAuthenticated = require('../middlewares/authMiddleware');
 
 // Route: Hiển thị danh sách hoá đơn
-router.get('/',isAuthenticated, async (req, res) => {
+router.get('/', isAuthenticated, async (req, res) => {
     try {
         const employeeId = req.session.employeeId;
-        const selectedDate = req.query.selectedDate || moment().tz('Asia/Ho_Chi_Minh').format('YYYY-MM-DD'); 
+        const selectedDate = req.query.selectedDate || moment().tz('Asia/Ho_Chi_Minh').format('YYYY-MM-DD');
         const startOfDay = moment(selectedDate).startOf('day').toDate();
         const endOfDay = moment(selectedDate).endOf('day').toDate();
 
@@ -39,5 +39,12 @@ router.get('/',isAuthenticated, async (req, res) => {
     }
 });
 
+// Route: Tìm kiếm hóa đơn
+router.get('/search', isAuthenticated, async (req, res) => {
+    try {
 
+    } catch (error) {
+        console.log(error);
+    }
+});
 module.exports = router;
