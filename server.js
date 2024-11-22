@@ -1,35 +1,24 @@
+// Import các thư viện
 const express = require("express");
 const mongoose = require('mongoose');
 const session = require('express-session')
-const app = express();
 const path = require('path');
 const fs = require('fs');
 const cors = require('cors');
+const app = express();
 
+// Cổng cho server
 const port = 3000;
 
-
-
-// Gửi yêu cầu cập nhật
-// updateOrderItem('orderIdValue', 'productIdValue', 5);
-app.use(cors());
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
-app.use(express.static(path.join(__dirname, 'public')));
-app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
-
-const uploadDir = path.join(__dirname, 'public/uploads');
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-}
+// Kết nối với MongoDB
 mongoose.connect('mongodb://localhost:27017/crud', { useNewUrlParser: true })
     .then(() => console.log('Connected to MongoDB'))
     .catch(err => console.error('Failed to connect to MongoDB', err));
 
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+// CORS cho phép yêu cầu từ các nguồn khác nhau
+app.use(cors());
 
-// Cấu hình session
+// Tạo session
 app.use(session({
     secret: 'secret-key',
     resave: false,
@@ -37,16 +26,30 @@ app.use(session({
     cookie: { secure: false }
 }));
 
+// Cấu hình view engine sử dụng EJS 
+app.set('view engine', 'ejs');
+// Đặt thư mục chứa các file view EJS
+app.set('views', path.join(__dirname, 'views'));
+
+// Tạo thư mục cho các tệp tĩnh
+app.use(express.static(path.join(__dirname, 'public')));
+// Tạo thư mục cho các tệp hình ảnh
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+
+// Cấu hình các middleware để xử lý các yêu cầu gửi lên
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
+
 // Middleware để lưu thông tin người dùng vào locals
 app.use((req, res, next) => {
-    res.locals.employeeId = req.session.employeeId || null;  // Truyền employeeId vào layout
-    res.locals.role = req.session.role || null;  // Truyền role vào layout
+    res.locals.employeeId = req.session.employeeId || null;  // Truyền employeeId vào view
+    res.locals.role = req.session.role || null;  // Truyền role vào view
     next();
 });
 
 
-// Cung cấp thư mục uploads như một static folder
-
+// Cấu hình các route sử dụng các router riêng biệt
 const indexRouter = require('./routers/Global');
 const employeeRouter = require('./routers/EmployeeRouter');
 const productRouter = require('./routers/ProductRouter');
@@ -54,6 +57,7 @@ const orderRouter = require('./routers/OrderRouter');
 const customerTouter = require('./routers/CustomerRouter');
 const billRouter = require('./routers/BillRouter');
 
+// Đăng ký các router với các đường dẫn tương ứng
 app.use('/', indexRouter);
 app.use('/employees', employeeRouter);
 app.use('/products', productRouter);
@@ -61,6 +65,7 @@ app.use('/orders', orderRouter);
 app.use('/customers', customerTouter);
 app.use('/bills', billRouter);
 
+// Khởi động server
 app.listen(port, function () {
     console.log(`Server is running on port http://localhost:${port}`);
 })

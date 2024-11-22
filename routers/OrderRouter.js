@@ -6,50 +6,37 @@ const Bill = require('../models/Bill');
 const isAuthenticated = require('../middlewares/authMiddleware');
 const Customer = require('../models/Customer');
 
-// Hàm tiện ích: Tính tổng giá trị và số lượng giỏ hàng
-function calculateCartTotals(orderItems) {
-    let totalPrice = 0;
-    let totalQuantity = 0;
-
-    orderItems.forEach(item => {
-        totalPrice += item.price * item.quantity;
-        totalQuantity += item.quantity;
-    });
-
-    return { totalPrice, totalQuantity };
-}
-
 // Route: Hiển thị giỏ hàng
 router.get('/', isAuthenticated, async (req, res) => {
     try {
-        const employeeId = req.session.employeeId;
-        // Tìm tất cả các đơn hàng của nhân viên với orderItems
+        const employeeId = req.session.employeeId; // Lấy employeeId từ session
         const orders = await Order.find({ employeeId })
-            .populate('orderItems.productId')  // Populate productId trong orderItems
-            .populate('customerId');  // Populate thông tin khách hàng
+            .populate('orderItems.productId')
+            .populate('customerId');
 
-        // Kiểm tra xem có đơn hàng nào không
-        if (!orders || orders.length === 0 || !orders[0].orderItems.length) {
+        // Kiểm tra nếu không có đơn hàng nào
+        if (!orders.length || !orders[0].orderItems.length) {
             return res.render('layout', {
                 content: 'pages/orders',
                 orderItems: [],
                 totalPrice: 0,
                 totalQuantity: 0,
                 orderId: null,
-                employeeId: employeeId,
-                customer: null
+                customer: null,
+                employeeId,
             });
         }
 
-        // Lấy orderId của đơn hàng đầu tiên (hoặc có thể thay đổi theo yêu cầu)
-        const orderId = orders[0]._id;
+        // Lấy thông tin từ đơn hàng đầu tiên
+        const { orderItems, customerId: customer, _id: orderId } = orders[0];
 
-        // Lấy các orderItems của đơn hàng đầu tiên
-        const orderItems = orders[0].orderItems;
-        const customer = orders[0].customerId;
-
-        // Tính toán tổng giá trị và tổng số lượng sản phẩm
-        const { totalPrice, totalQuantity } = calculateCartTotals(orderItems);
+        // Tính tổng giá trị và tổng số lượng sản phẩm
+        let totalPrice = 0;
+        let totalQuantity = 0;
+        for (const item of orderItems) {
+            totalPrice += item.price * item.quantity;
+            totalQuantity += item.quantity;
+        }
 
         // Render lại trang giỏ hàng với các dữ liệu tính toán
         res.render('layout', {
@@ -57,29 +44,13 @@ router.get('/', isAuthenticated, async (req, res) => {
             orderItems,
             totalPrice,
             totalQuantity,
-            orderId: orderId,
-            customer
+            orderId,
+            customer,
+            employeeId,
         });
     } catch (err) {
         console.error('Error fetching cart:', err);
         res.status(500).send('Có lỗi khi lấy giỏ hàng.');
-    }
-});
-
-// Route: Tìm kiếm sản phẩm
-router.get('/search', isAuthenticated, async (req, res) => {
-    const searchQuery = req.query.q || '';
-    try {
-        const products = await Product.find({
-            $or: [
-                { name: { $regex: searchQuery, $options: 'i' } },
-                { code: { $regex: searchQuery, $options: 'i' } },
-            ],
-        });
-        res.json(products);
-    } catch (err) {
-        console.error('Error searching products:', err);
-        res.status(500).send('Có lỗi xảy ra khi tìm kiếm sản phẩm.');
     }
 });
 
@@ -157,6 +128,7 @@ router.post('/add/:id', isAuthenticated, async (req, res) => {
         res.status(500).send('Có lỗi xảy ra khi thêm sản phẩm vào giỏ hàng.');
     }
 });
+
 // Route: Cộng 1 sản phẩm vào giỏ hàng
 router.post('/increase/:id', isAuthenticated, async (req, res) => {
     try {
@@ -186,6 +158,7 @@ router.post('/increase/:id', isAuthenticated, async (req, res) => {
         res.status(500).send('Có lỗi xảy ra khi tăng số lượng sản phẩm.');
     }
 });
+
 // Route: Trừ 1 sản phẩm vào giỏ hàng
 router.post('/decrease/:id', isAuthenticated, async (req, res) => {
     try {
@@ -276,39 +249,36 @@ router.get('/customer-remove-order/:customerId', isAuthenticated, async (req, re
 router.post('/checkout', isAuthenticated, async (req, res) => {
     try {
         const employeeId = req.session?.employeeId;
-        let paymentMethod = req.body.paymentMethod;
-        const discountPercentage = parseFloat(req.body.discountPercentage) || 0;
-        const discountAmount = parseFloat(req.body.discountAmount) || 0;
-        let discount = 0;
+        const { paymentMethod, discountPercentage = 0, discountAmount = 0 } = req.body;
 
         // Lấy đơn hàng từ database
-        const order = await Order.findOne({ employeeId }).populate({
-            path: 'orderItems.productId',
-            model: 'Product',
-        });
-
+        const order = await Order.findOne({ employeeId }).populate('orderItems.productId');
         if (!order) {
             return res.status(404).json({ message: 'Không tìm thấy đơn hàng để thanh toán' });
         }
 
+        // Tính tổng tiền và giảm giá
+        let discount = 0;
         let totalAmount = order.totalAmount;
 
         if (discountPercentage > 0 && discountPercentage < 100) {
-            discount = totalAmount * (discountPercentage / 100);
+            discount += totalAmount * (discountPercentage / 100);
             totalAmount -= discount;
         } else if (discountPercentage >= 100) {
             return res.status(400).json({ message: 'Giảm giá theo phần trăm phải nhỏ hơn 100%' });
         }
 
         if (discountAmount > 0 && discountAmount < totalAmount) {
-            totalAmount -= discountAmount;
             discount += discountAmount;
+            totalAmount -= discountAmount;
         } else if (discountAmount >= totalAmount) {
             return res.status(400).json({ message: 'Giảm giá theo số tiền phải nhỏ hơn tổng tiền' });
         }
 
+        // Lấy mã hóa đơn mới
         const lastBillCode = await Bill.findOne().sort({ code: -1 });
         const codeBill = lastBillCode ? lastBillCode.code + 1 : 1000;
+
         // Tạo hóa đơn
         await Bill.create({
             employeeId: order.employeeId,
@@ -318,24 +288,24 @@ router.post('/checkout', isAuthenticated, async (req, res) => {
                 quantity: item.quantity,
                 price: item.price,
             })),
-            paymentMethod: paymentMethod,
-            totalAmount: totalAmount,
-            discount: discount,
+            paymentMethod,
+            totalAmount,
+            discount,
             code: codeBill,
             createdAt: new Date(),
         });
 
-        // Giảm số lượng tồn kho của sản phẩm
-        for (let item of order.orderItems) {
+        // Cập nhật kho
+        for (const item of order.orderItems) {
             const product = item.productId;
-            const quantityPurchased = item.quantity;
-
-            if (product.stock < quantityPurchased) {
+            if (product.stock < item.quantity) {
                 return res.status(400).json({ message: `Sản phẩm ${product.name} không đủ số lượng trong kho` });
             }
-            product.stock -= quantityPurchased;
+            product.stock -= item.quantity;
             await product.save();
         }
+
+        // Cập nhật thông tin khách hàng
         const customer = await Customer.findById(order.customerId);
         if (customer) {
             customer.purchase += 1;
@@ -343,12 +313,30 @@ router.post('/checkout', isAuthenticated, async (req, res) => {
             await customer.save();
         }
 
-
+        // Xóa đơn hàng sau khi thanh toán
         await Order.deleteOne({ _id: order._id });
+
         res.redirect('/orders');
     } catch (err) {
         console.error('Error processing checkout:', err);
         res.status(500).json({ message: 'Đã có lỗi xảy ra khi xử lý thanh toán' });
+    }
+});
+
+// Route: Tìm kiếm sản phẩm
+router.get('/search', isAuthenticated, async (req, res) => {
+    const searchQuery = req.query.q || '';
+    try {
+        const products = await Product.find({
+            $or: [
+                { name: { $regex: searchQuery, $options: 'i' } },
+                { code: { $regex: searchQuery, $options: 'i' } },
+            ],
+        });
+        res.json(products);
+    } catch (err) {
+        console.error('Error searching products:', err);
+        res.status(500).send('Có lỗi xảy ra khi tìm kiếm sản phẩm.');
     }
 });
 

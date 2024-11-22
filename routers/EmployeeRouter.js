@@ -4,28 +4,21 @@ const bcrypt = require('bcrypt');
 const Employee = require('../models/Employee');
 const isAuthenticated = require('../middlewares/authMiddleware');
 
-// Helper function for handling errors
-const handleError = (res, error, message = 'Đã xảy ra lỗi', statusCode = 500) => {
-    console.error(error);
-    res.status(statusCode).send(message);
-};
-
 // Route: Lấy danh sách nhân viên
 router.get('/', isAuthenticated, async (req, res) => {
     try {
         const employees = await Employee.find();
         res.render('layout', { content: 'pages/employees', employees });
     } catch (error) {
-        handleError(res, error, 'Lỗi khi lấy danh sách nhân viên');
+        console.error(error);
+        res.status(500).send('Lỗi khi lấy danh sách nhân viên');
     }
 });
 
 // Route: Thêm nhân viên mới
 router.post('/add', isAuthenticated, async (req, res) => {
     try {
-        const {
-            name, email, password = "123456", phone, address, salary, role
-        } = req.body;
+        const { name, email, password = "123456", phone, address, salary, role } = req.body;
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const newEmployee = new Employee({
@@ -42,7 +35,8 @@ router.post('/add', isAuthenticated, async (req, res) => {
         await newEmployee.save();
         res.redirect('/employees');
     } catch (error) {
-        handleError(res, error, 'Lỗi khi thêm nhân viên');
+        console.error(error);
+        res.status(500).send('Lỗi khi thêm nhân viên');
     }
 });
 
@@ -57,26 +51,13 @@ router.get('/delete/:id', isAuthenticated, async (req, res) => {
         await Employee.findByIdAndDelete(id);
         res.redirect('/employees');
     } catch (error) {
-        handleError(res, error, 'Lỗi khi xóa nhân viên');
-    }
-});
-
-// Route: Hiển thị form sửa nhân viên
-router.get('/update/:id', isAuthenticated, async (req, res) => {
-    try {
-        const { id } = req.params;
-        const employee = await Employee.findById(id);
-
-        if (!employee) return res.status(404).send('Nhân viên không tồn tại');
-
-        res.render('layout', { content: 'pages/employee-update', employee });
-    } catch (error) {
-        handleError(res, error, 'Lỗi khi tìm nhân viên');
+        console.error(error);
+        res.status(500).send('Lỗi khi xóa nhân viên');
     }
 });
 
 // Route: Cập nhật thông tin nhân viên
-router.post('/update/:id', isAuthenticated, async (req, res) => {
+router.post('/edit/:id', isAuthenticated, async (req, res) => {
     try {
         const { id } = req.params;
         const { name, email, phone, address, position, shift, salary, role } = req.body;
@@ -91,7 +72,8 @@ router.post('/update/:id', isAuthenticated, async (req, res) => {
 
         res.redirect('/employees');
     } catch (error) {
-        handleError(res, error, 'Lỗi khi cập nhật thông tin');
+        console.error(error);
+        res.status(500).send('Lỗi khi cập nhật thông tin');
     }
 });
 
@@ -105,40 +87,46 @@ router.get('/detail/:id', isAuthenticated, async (req, res) => {
 
         res.render('layout', { content: 'pages/employee-detail', employee });
     } catch (error) {
-        handleError(res, error, 'Lỗi khi tìm nhân viên');
+        console.error(error);
+        res.status(500).send('Lỗi khi tìm nhân viên');
     }
 });
+
 // Route: Tìm kiếm nhân viên
 router.get('/search', isAuthenticated, async (req, res) => {
     const searchQuery = req.query.q;
     try {
-        employee = searchQuery
+        const employee = searchQuery
             ? await Employee.find({
                 $or: [
-                    { name: { $regex: searchQuery, $options: 'i' } }, // Tìm kiếm tên sản phẩm
-                    { phone: { $regex: searchQuery, $options: 'i' } }, // Tìm kiếm mã sản phẩm
+                    { name: { $regex: searchQuery, $options: 'i' } }, 
+                    { phone: { $regex: searchQuery, $options: 'i' } }, 
                     { email: { $regex: searchQuery, $options: 'i' } }
                 ]
             }) : await Employee.find();
         res.json(employee);
-    } catch (error) { 
-        console.log(error);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Lỗi khi tìm kiếm nhân viên');
     }
 });
 
-
-
 // Route: Thay đổi mật khẩu
-router.post('/change-password/:employeeId' ,isAuthenticated, async (req, res) => {
+router.post('/change-password/:employeeId', isAuthenticated, async (req, res) => {
     try {
         const { employeeId } = req.params; // Lấy employeeId từ URL params
         const { currentPassword, newPassword } = req.body; // Nhận dữ liệu từ body request
+
+        // Lấy thông tin nhân viên
+        const employee = await Employee.findById(employeeId);
+        if (!employee) return res.status(404).send('Nhân viên không tồn tại');
 
         // Kiểm tra mật khẩu hiện tại
         const isPasswordMatch = await bcrypt.compare(currentPassword, employee.password);
         if (!isPasswordMatch) {
             return res.status(400).send('Mật khẩu hiện tại không đúng');
         }
+
         // Hash mật khẩu mới và cập nhật
         const hashedPassword = await bcrypt.hash(newPassword, 10);
         employee.password = hashedPassword;
@@ -146,7 +134,8 @@ router.post('/change-password/:employeeId' ,isAuthenticated, async (req, res) =>
 
         res.redirect(`/employees/detail/${employeeId}`);
     } catch (err) {
-        handleError(res, err, 'Lỗi khi thay đổi mật khẩu');
+        console.error(err);
+        res.status(500).send('Lỗi khi thay đổi mật khẩu');
     }
 });
 

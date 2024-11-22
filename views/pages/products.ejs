@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <style></style>
+
 <body>
     <!-- Danh sách sản phẩm  -->
     <div class="m-4">
@@ -22,7 +23,15 @@
                             <option value="snack">Snack</option>
                             <option value="others">Khác</option>
                         </select>
-
+                    </div>
+                    <div class="col-md-3">
+                        <label for="stockFilter" class="form-label">Chọn danh mục</label>
+                        <select class="form-select" id="stockFilter">
+                            <option value="">Lựa chọn</option>
+                            <option value="">Tất cả</option>
+                            <option value="inStock">Còn hàng </option>
+                            <option value="outOfStock">Hết hàng</option>
+                        </select>
                     </div>
 
                 </div>
@@ -36,15 +45,28 @@
                                 <div class="card" style="border:solid 1px rgb(5, 5, 5); ">
                                     <% }else{ %>
                                         <div class="card shadow"
-                                            style="border:solid 1px red; background-color: rgba(255, 0, 0, 0.18); ">
+                                            style="border:solid 1px red; background-color: rgba(255, 0, 0, .1); ">
                                             <% }%>
 
                                                 <div class="p-2 position-relative">
-                                                    <!-- Lớp phủ màu đỏ trên ảnh -->
-                                                    <div class="overlay-red"></div>
-                                                    <img src="/<%= product.image %>" alt="<%= product.name %>"
-                                                        width="100%" height="200px">
+                                                    <!-- Lớp cha chứa ảnh -->
+                                                    <div class="image-container"
+                                                        style="position: relative; width: 100%; height: 200px; overflow: hidden;">
+                                                        <!-- Ảnh sản phẩm -->
+                                                        <img src="/<%= product.image %>" alt="<%= product.name %>"
+                                                            style="width: 100%; height: 200px;">
+                                                        <!-- Lớp phủ màu đỏ -->
+                                                        <% if(product.stock <=0) { %>
+                                                            <div class="d-flex justify-content-center align-items-center text-center "
+                                                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 0, 0, 0.1); z-index: 1;">
+                                                                <b class="text-danger p-2 rounded"
+                                                                    style="font-size: 1.2rem; background-color: rgba(255, 255, 255, 0.8);">Hết
+                                                                    hàng</b>
+                                                            </div>
+                                                            <% } %>
+                                                    </div>
                                                 </div>
+
                                                 <div class="card-body">
                                                     <h6 class="card-title">
                                                         <%= product.name%>
@@ -439,14 +461,24 @@
                 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
                 <!-- Lọc sản phẩm theo danh mục  -->
                 <script>
-                    document.getElementById('categoryFilter').addEventListener('change', function () {
-                        var category = this.value;  // Lấy giá trị danh mục đã chọn
-                        var url = category ? `/products/filter?category=${category}` : '/products';  // Nếu có danh mục thì thêm vào URL
+                    document.querySelectorAll('#categoryFilter, #stockFilter').forEach(filter => {
+                        filter.addEventListener('change', function () {
+                            const category = document.getElementById('categoryFilter').value;
+                            const stockStatus = document.getElementById('stockFilter').value;
 
-                        // Chuyển hướng đến URL tương ứng
-                        window.location.href = url;
+                            // Xây dựng URL
+                            let url = '/products/filter';
+                            let params = new URLSearchParams();
+
+                            if (category) params.append('category', category);
+                            if (stockStatus) params.append('stockStatus', stockStatus);
+
+                            // Chuyển hướng URL
+                            window.location.href = url + '?' + params.toString();
+                        });
                     });
                 </script>
+
 
 
 

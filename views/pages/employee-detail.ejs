@@ -1,135 +1,115 @@
 <!-- employee-detail.ejs -->
 <div class="container mt-5">
-    <!-- Card hiển thị thông tin nhân viên -->
-    <div class="card shadow-lg">
-        <div class="card-header bg-info text-white">
-            <h4 class="mb-0">
-                <a href="/orders" class="btn btn-close"></a>
-                Thông tin cá nhân
-            </h4>
-        </div>
-        <div class="card-body">
-            <!-- Bảng hiển thị thông tin nhân viên -->
-            <table class="table table-bordered table-striped">
-                <tbody>
-                    <tr>
-                        <th scope="row">Họ và tên</th>
-                        <td>
-                            <%= employee.name %>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Email</th>
-                        <td>
-                            <%= employee.email %>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Số điện thoại</th>
-                        <td>
-                            <%= employee.phone %>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Địa chỉ</th>
-                        <td>
-                            <%= employee.address %>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Ngày bắt đầu</th>
-                        <td>
-                            <%= employee.startDate.toLocaleDateString() %>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Lương</th>
-                        <td>
-                            <%= employee.salary %>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Vai trò</th>
-                        <td>
-                            <%= employee.role %>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Mật khẩu</th>
-                        <td>
-                            <!-- <%= employee.password %> -->
-                            <button data-bs-toggle="modal" data-bs-target="#changePasswordModal<%= employee._id %>"
-                                class="btn btn-link btn-sm">Thay đổi mật khẩu</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <div class=" text-center d-flex justify-content-end ">
-                <a href="/employees/update/<%= employee._id %>" class="btn btn-warning">Thay đổi thông tin</a>
-            </div>
-        </div>
+    <!-- Tiêu đề trang -->
+    <h2 class="mb-4 text-center text-primary">Thông tin cá nhân</h2>
 
+    <!-- Bảng hiển thị thông tin nhân viên -->
+    <table class="table table-bordered table-striped">
+        <tbody>
+            <tr>
+                <th scope="row">Họ và tên</th>
+                <td>
+                    <%= employee.name %>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Email</th>
+                <td>
+                    <%= employee.email %>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Số điện thoại</th>
+                <td>
+                    <%= employee.phone %>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Địa chỉ</th>
+                <td>
+                    <%= employee.address %>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Ngày bắt đầu</th>
+                <td>
+                    <%= employee.startDate.toLocaleDateString() %>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Lương</th>
+                <td>
+                    <%= employee.salary %>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Vai trò</th>
+                <td>
+                    <%= employee.role %>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Mật khẩu</th>
+                <td>
+                    <button data-bs-toggle="modal" data-bs-target="#changePasswordModal<%= employee._id %>"
+                        class="btn btn-link btn-sm text-info">Thay đổi mật khẩu</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Nút chỉnh sửa thông tin nhân viên -->
+    <div class="text-center mt-3">
+        <a href="/employees/update/<%= employee._id %>" class="btn btn-warning">Thay đổi thông tin</a>
     </div>
 </div>
 
-<!-- Form để thay đổi mật khẩu  -->
+<!-- Modal thay đổi mật khẩu -->
 <div class="modal fade" id="changePasswordModal<%= employee._id %>" tabindex="-1"
     aria-labelledby="changePasswordModal<%= employee._id %>" aria-hidden="true">
     <div class="modal-dialog">
-        <div class="modal-content w-100">
+        <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="viewEmployeeModalLabel<%= employee._id %>">Thông tin chi tiết nhân
-                    viên
-                </h5>
+                <h5 class="modal-title">Cập nhật mật khẩu</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <!-- change-password.ejs -->
-                <div class="container">
-                    <form action="/employees/change-password/<%= employee._id %>" method="POST">
-                        <!-- Mật khẩu hiện tại -->
-                        <div class="mb-3">
-                            <label for="current-password" class="form-label">Mật khẩu hiện tại</label>
-                            <input type="password" class="form-control" id="current-password" name="currentPassword"
-                                required>
-                        </div>
-
-                        <!-- Mật khẩu mới -->
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Mật khẩu mới</label>
-                            <input type="password" class="form-control" id="password" name="newPassword" required
-                                oninput="checkPassword()">
-                        </div>
-
-                        <!-- Xác nhận mật khẩu mới -->
-                        <div class="mb-3">
-                            <label for="confirm-password" class="form-label">Xác nhận mật khẩu mới</label>
-                            <input type="password" class="form-control" id="confirm-password" name="confirmPassword"
-                                required oninput="checkPassword()">
-                        </div>
-
-                        <!-- Thông báo lỗi nếu mật khẩu không khớp -->
-                        <div id="error-message-checkpassword" class="mt-1 mb-2" style="display: none;">
-                            <p class="col-12 text-danger text-center p-1 rounded" style="border:solid 1px red;">
-                                Mật khẩu xác nhận không khớp.
-                            </p>
-                        </div>
-
-                        <!-- Thông báo tích xanh nếu mật khẩu trùng khớp -->
-                        <div id="success-message-checkpassword" class="mt-1 mb-2" style="display: none;">
-                            <p class="col-12 text-success text-center p-1 rounded" style="border:solid 1px green;">
-                                Mật khẩu xác nhận khớp.
-                            </p>
-                        </div>
-                        <!-- Nút submit -->
-                        <button type="submit" class="btn btn-primary w-100">Cập nhật mật khẩu</button>
-                    </form>
-                </div>
+                <form action="/employees/change-password/<%= employee._id %>" method="POST">
+                    <div class="mb-3">
+                        <label for="current-password" class="form-label">Mật khẩu hiện tại</label>
+                        <input type="password" class="form-control" id="current-password" name="currentPassword"
+                            required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Mật khẩu mới</label>
+                        <input type="password" class="form-control" id="password" name="newPassword" required
+                            oninput="checkPassword()">
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirm-password" class="form-label">Xác nhận mật khẩu mới</label>
+                        <input type="password" class="form-control" id="confirm-password" name="confirmPassword"
+                            required oninput="checkPassword()">
+                    </div>
+                    <!-- Thông báo lỗi nếu mật khẩu không khớp -->
+                    <div id="error-message-checkpassword" class="mt-1 mb-2" style="display: none;">
+                        <p class="col-12 text-danger text-center p-1 rounded" style="border:solid 1px red;">
+                            Mật khẩu xác nhận không khớp.
+                        </p>
+                    </div>
+                    <!-- Thông báo tích xanh nếu mật khẩu trùng khớp -->
+                    <div id="success-message-checkpassword" class="mt-1 mb-2" style="display: none;">
+                        <p class="col-12 text-success text-center p-1 rounded" style="border:solid 1px green;">
+                            Mật khẩu xác nhận khớp.
+                        </p>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Cập nhật mật khẩu</button>
+                </form>
             </div>
-
         </div>
     </div>
 </div>
+
 <script>
     function checkPassword() {
         var password = document.getElementById("password").value;
@@ -137,7 +117,6 @@
         const errorMessageCheckPassword = document.getElementById('error-message-checkpassword');
         const successMessageCheckPassword = document.getElementById('success-message-checkpassword');
 
-        // Kiểm tra nếu mật khẩu và xác nhận mật khẩu trùng khớp
         if (password !== confirmPassword) {
             errorMessageCheckPassword.style.display = 'block';
             successMessageCheckPassword.style.display = 'none';
@@ -148,5 +127,5 @@
     }
 </script>
 
-
+<!-- Script Bootstrap -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
