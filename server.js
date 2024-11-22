@@ -5,9 +5,15 @@ const session = require('express-session')
 const app = express();
 const path = require('path');
 const fs = require('fs');
+const cors = require('cors');
 
 const port = 3000;
 
+
+
+// Gửi yêu cầu cập nhật
+// updateOrderItem('orderIdValue', 'productIdValue', 5);
+app.use(cors());
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));

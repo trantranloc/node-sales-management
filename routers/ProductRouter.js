@@ -110,4 +110,32 @@ router.get('/delete/:id', async (req, res) => {
 });
 
 
+
+
+    
+    //Chọn danh mục sản phẩm
+    // Route: Danh sách sản phẩm với bộ lọc danh mục
+    router.get('/filter', async (req, res) => {
+        const { category } = req.query; // Lấy giá trị category từ query params
+    
+        let filter = {};
+        if (category) {
+            filter.category = category; // Lọc sản phẩm theo category nếu có
+        }
+    
+        try {
+            const products = await Product.find(filter);  // Lấy sản phẩm từ database với filter
+            res.render('layout', { content: 'pages/products', products });
+        } catch (error) {
+            console.error(error);
+            res.status(500).send('Lỗi khi lấy sản phẩm');
+        }
+    });
+    
+    
+   
+    
+
+
+
 module.exports = router;

@@ -121,7 +121,6 @@
 
 <body>
     <div class="container-fluid mt-4">
-
         <div class="row">
             <!-- Tìm kiếm sản phẩm -->
             <div class="col-12 col-md-8 search-bar position-relative">
@@ -170,12 +169,13 @@
                         </div>
                         <div class="quantity-control d-flex">
                             <!-- Giảm số lượng -->
-                            <form action="/orders/update/<%= item._id %>/<%= item.productId._id %>" method="POST"
-                                class="d-flex">
+                            <form action="/orders/decrease/<%= item.productId._id %>" method="POST" class="d-flex">
                                 <button type="submit" class="btn btn-outline-secondary btn-sm" name="action"
                                     value="decrease">-</button>
-                                <input type="number" class="form-control mx-2" value="<%= item.quantity %>"
-                                    style="width: 50px;" readonly>
+                            </form>
+                                <p class=" m-1 me-1 ms-1  border rounded p-2 text-center" style="width: 40px;"><%= item.quantity %></p>
+                            <!-- Tăng số lượng -->
+                            <form action="/orders/increase/<%= item.productId._id %>" method="POST" class="d-flex">
                                 <button type="submit" class="btn btn-outline-secondary btn-sm" name="action"
                                     value="increase">+</button>
                             </form>
@@ -249,18 +249,33 @@
                                     </span>
 
                                     <span id="totalAmount">
-                                        <%= totalPrice.toLocaleString() %>
-                                            VND
+                                        <%= totalPrice.toLocaleString()%>vnđ
                                     </span>
+
                                 </p>
                             </div>
 
                             <!-- Nút thanh toán -->
                             <div class=" col-3 d-flex justify-content-around gap-2">
                                 <button class="btn btn-secondary w-100 m-1">Hủy</button>
-                                <button class="btn btn-success w-100 m-1" data-bs-target="#viewDetailOrderModal"
-                                    data-bs-toggle="modal">Thanh
-                                    Toán</button>
+
+                                <button class="btn btn-success w-100 m-1" id="paymentButton">Thanh Toán</button>
+
+                                <script>
+                                    document.getElementById('paymentButton').addEventListener('click', function (event) {
+                                        var total = document.getElementById('totalAmount').textContent.trim();
+                                        var totalAmount = parseFloat(total.replace(/[^0-9.-]+/g, ""));
+                                        if (isNaN(totalAmount) || totalAmount === 0) {
+                                            alert('Vui lòng thêm sản phẩm vào giỏ hàng');
+                                            event.preventDefault();
+                                        } else {
+                                            console.log("Tiến hành thanh toán với tổng tiền:", totalAmount);
+                                            $('#viewDetailOrderModal').modal('show');
+                                        }
+                                    });
+                                </script>
+
+
                             </div>
                         </div>
                     </div>
@@ -275,89 +290,95 @@
         <div class="modal-dialog modal-dialog-scrollable modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="viewDetailOrderModalLabel">Chi tiết đơn
-                        hàng</h5>
+                    <h5 class="modal-title" id="viewDetailOrderModalLabel">Chi tiết đơn hàng</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="order-summary">
-                        <div class="row mb-3">
-                            <div class="col-6"><strong>Số sản
-                                    phẩm:</strong></div>
-                            <div class="col-6 text-end">
-                                <%= totalQuantity %>
+                    <!-- Form thanh toán -->
+                    <form id="checkoutForm" action="orders/checkout" method="POST">
+                        <!-- Thêm thông tin đơn hàng và phương thức thanh toán vào form -->
+                        <div class="order-summary">
+                            <div class="row mb-3">
+                                <div class="col-6"><strong>Số sản phẩm:</strong></div>
+                                <div class="col-6 text-end">
+                                    <%= totalQuantity %>
+                                </div>
                             </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-6"><strong>Giảm giá theo
-                                    %:</strong></div>
-                            <div class="col-6">
-                                <input type="number" class="form-control" id="discountPercentage"
-                                    name="discountPercentage" placeholder="Nhập giảm giá %" value="0">
+                            <div class="row mb-3">
+                                <div class="col-6"><strong>Giảm giá theo %:</strong></div>
+                                <div class="col-6">
+                                    <input type="number" class="form-control" id="discountPercentage"
+                                        name="discountPercentage" placeholder="Nhập giảm giá %" value=""
+                                        oninput="checkDiscountPercentage()">
+                                    <div id="error-message-percentage" class="mt-1" style="display: none;">
+                                        <p class="col-12 text-danger text-center p-1 rounded"
+                                            style="border: solid 1px red;">
+                                            Phải bé hơn 100%
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-6"><strong>Giảm giá theo số
-                                    tiền:</strong></div>
-                            <div class="col-6">
-                                <input type="number" class="form-control" id="discountAmount" name="discountAmount"
-                                    placeholder="Nhập giảm giá (VND)" value="0">
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-6"><strong>Tổng
-                                    tiền:</strong></div>
-                            <div class="col-6 text-end text-danger" id="totalAmount">
-                                <%= totalPrice.toLocaleString() %> VND
-                            </div>
-                        </div>
-                    </div>
 
-                    <hr>
+                            <div class="row mb-3">
+                                <div class="col-6"><strong>Giảm giá theo số tiền:</strong></div>
+                                <div class="col-6">
+                                    <input type="number" class="form-control" id="discountAmount" name="discountAmount"
+                                        placeholder="Nhập giảm giá (VND)" value="" oninput="checkDiscountAmount()">
+                                    <div id="error-message-amount" class="mt-1" style="display: none;">
+                                        <p class="col-12 text-danger text-center p-1 rounded"
+                                            style="border: solid 1px red;">
+                                            Phải bé hơn tổng tiền
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
 
-                    <div class="payment-method">
-                        <h6>Phương thức thanh toán:</h6>
-                        <div class="d-flex justify-content-between mb-3">
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="paymentMethod" id="paymentMethodCash"
-                                    value="cash">
-                                <label class="form-check-label" for="paymentMethodCash">Tiền mặt</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="paymentMethod"
-                                    id="paymentMethodBankTransfer" value="bankTransfer">
-                                <label class="form-check-label" for="paymentMethodBankTransfer">Chuyển
-                                    khoản ngân
-                                    hàng</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="paymentMethod" id="paymentMethodCard"
-                                    value="card">
-                                <label class="form-check-label" for="paymentMethodCard">Thẻ tín
-                                    dụng</label>
+                            <div class="row mb-3">
+                                <div class="col-6"><strong>Tổng tiền:</strong></div>
+                                <div class="col-6 text-end text-danger" id="totalAmount">
+                                    <%= totalPrice.toLocaleString() %> VND
+                                        <div id="totalPriceData" data-total-price="<%= totalPrice %>"></div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                    <button type="submit" class="btn btn-primary" form="checkoutForm">Xác nhận thanh toán</button>
+
+                        <hr>
+
+                        <!-- Phương thức thanh toán -->
+                        <div class="payment-method">
+                            <h6>Phương thức thanh toán:</h6>
+                            <div class="d-flex justify-content-between mb-3">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="paymentMethod"
+                                        id="paymentMethodCash" value="cash" required>
+                                    <label class="form-check-label" for="paymentMethodCash">Tiền mặt</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="paymentMethod"
+                                        id="paymentMethodOnline" value="online">
+                                    <label class="form-check-label" for="paymentMethodOnline">Chuyển khoản ngân
+                                        hàng</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="paymentMethod"
+                                        id="paymentMethodCard" value="card">
+                                    <label class="form-check-label" for="paymentMethodCard">Thẻ tín dụng</label>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Thêm input ẩn cho thông tin đơn hàng -->
+                        <input type="hidden" name="orderId" value="<%= orderId %>">
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                            <button type="submit" class="btn btn-primary">Xác nhận thanh toán</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Form thanh toán -->
-    <form id="checkoutForm" action="orders/checkout" method="POST">
-        <!-- Các input hidden hoặc thông tin cần thiết -->
-        <input type="hidden" name="orderId" value="<%= orderId %>">
-        <select name="paymentMethod" required>
-            <option value="cash">Thanh toán tiền mặt</option>
-            <option value="bankTransfer">Chuyển khoản ngân hàng</option>
-            <option value="card">Thẻ tín dụng</option>
-        </select>
-        <input type="submit" value="Thanh toán">
-    </form>
 
     <!-- Thêm khách hàng  -->
     <div class="modal fade" id="addCustomerModal" tabindex="-1" aria-labelledby="addCustomerModalLabel">
@@ -372,11 +393,11 @@
                         <div class="row mb-3 ">
                             <div class="col-6">
                                 <strong class="m-2">Tên khách hàng</strong>
-                                <input type="text" class="form-control" name="name">
+                                <input type="text" class="form-control" name="name" required>
                             </div>
                             <div class="col-6">
                                 <strong class="m-2">Số điện thoại</strong>
-                                <input type="text" class="form-control" name="phone">
+                                <input type="text" class="form-control" name="phone" required>
                             </div>
                         </div>
                         <div class="row mb-3 ">
@@ -387,15 +408,15 @@
                         </div>
                         <!-- Nút hành động -->
                         <div class="text-end p-4">
-                            <button data-bs-dismiss="modal" class="btn btn-secondary">Hủy</button>
-                            <button type="submit" class="btn btn-primary">Thêm sản
-                                phẩm</button>
+                            <button data-bs-dismiss="modal" type="button" class="btn btn-secondary">Hủy</button>
+                            <button type="submit" class="btn btn-primary">Thêm khách hàng</button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
     </div>
+
     <script>
         async function searchProducts(query) {
             const resultContainerProduct = document.getElementById('search-results');
@@ -460,6 +481,32 @@
         }
 
 
+    </script>
+    <script>
+        // Hàm kiểm tra Giảm giá theo %
+        function checkDiscountPercentage() {
+            const discountPercentage = parseFloat(document.getElementById('discountPercentage').value);
+            const errorMessage = document.getElementById('error-message-percentage');
+
+            if (discountPercentage > 100) {
+                errorMessage.style.display = 'block'; // Hiển thị thông báo lỗi nếu giảm giá > 100%
+            } else {
+                errorMessage.style.display = 'none'; // Ẩn thông báo lỗi nếu giảm giá <= 100%
+            }
+        }
+
+        // Hàm kiểm tra Giảm giá theo số tiền
+        function checkDiscountAmount() {
+            const discountAmount = parseFloat(document.getElementById('discountAmount').value);
+            const totalPrice = parseFloat('<%= totalPrice %>'); // Lấy giá trị totalPrice từ EJS
+            const errorMessageAmount = document.getElementById('error-message-amount');
+
+            if (discountAmount > totalPrice) {
+                errorMessageAmount.style.display = 'block'; // Hiển thị thông báo lỗi nếu giảm giá > tổng tiền
+            } else {
+                errorMessageAmount.style.display = 'none'; // Ẩn thông báo lỗi nếu giảm giá <= tổng tiền
+            }
+        }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>

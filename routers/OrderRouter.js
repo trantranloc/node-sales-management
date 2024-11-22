@@ -241,6 +241,36 @@ router.post('/checkout', isAuthenticated, async (req, res) => {
 });
 
 
+// Cập nhật số lượng sản phẩm
+//Cộng số lượng sản phẩm trong giỏ hàng
+
+router.post('/update-quantity/:orderId/:productId', isAuthenticated, async (req, res) => {
+    try {
+        const { orderId, productId } = req.params;
+        const order = await Order.findById(orderId);
+        if (!order) {
+            return res.status(404).send('Đơn hàng không tồn tại.');
+        }
+        const product = await Product.findById(productId);
+        if (!product) {
+            return res.status(404).send('Sản phẩm không tồn tại.');
+        }
+        // Cập nhật số lượng sản phẩm trong giỏ hàng
+        order.items.forEach((item) => {
+            if (item.productId.toString() === productId.toString()) {
+                item.quantity = req.body.quantity;
+                item.totalPrice = item.quantity * product.price;
+                // item.totalPrice = req.body.quantity * product.price;
+                }
+                });
+                await order.save();
+                res.send('Số lượng sản phẩm đã được cập nhật.');
+                } catch (err) {
+                    console.error('Error updating quantity:', err);
+                    res.status(500).send('Có lỗi khi cập nhật số lượng sản phẩm.');
+                    }
+                    });
+                    
 
 
 

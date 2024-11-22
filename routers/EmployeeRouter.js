@@ -107,5 +107,32 @@ router.get('/detail/:id', async (req, res) => {
         handleError(res, error, 'Lỗi khi tìm nhân viên');
     }
 });
+// Route: Tìm kiếm nhân viên
+router.get('/search', async (req, res) => {
+    const searchQuery = req.query.q || '';
+
+    // Kiểm tra đầu vào
+    if (!searchQuery.trim()) {
+        return res.status(400).send('Vui lòng nhập từ khóa tìm kiếm.');
+    }
+
+    try {
+        // Tìm kiếm nhân viên theo tên
+        const employees = await Employee.find({
+            $or: [
+                { name: { $regex: searchQuery, $options: 'i' } },
+            ],
+        });
+
+        
+        res.redirect("/employees")
+
+    } catch (err) {
+        console.error('Error searching employees:', err);
+        res.status(500).send('Có lỗi xảy ra khi tìm kiếm nhân viên.');
+    }
+});
+
+
 
 module.exports = router;
