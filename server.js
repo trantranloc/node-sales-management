@@ -1,6 +1,5 @@
 const express = require("express");
 const mongoose = require('mongoose');
-const bodyParser = require('body-parser')
 const session = require('express-session')
 const app = express();
 const path = require('path');
@@ -54,7 +53,6 @@ const productRouter = require('./routers/ProductRouter');
 const orderRouter = require('./routers/OrderRouter');
 const customerTouter = require('./routers/CustomerRouter');
 const billRouter = require('./routers/BillRouter');
-// const paymentRouter = require('./routers/payment')
 
 app.use('/', indexRouter);
 app.use('/employees', employeeRouter);

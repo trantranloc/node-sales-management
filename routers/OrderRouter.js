@@ -3,14 +3,7 @@ const router = express.Router();
 const Order = require('../models/Order');
 const Product = require('../models/Product');
 const Bill = require('../models/Bill');
-const Customer = require('../models/Customer');
-
-
-// Middleware: Kiểm tra đăng nhập
-function isAuthenticated(req, res, next) {
-    if (!req.session.employeeId) return res.redirect('/login'); // Kiểm tra session
-    next();
-}
+const isAuthenticated = require('../middlewares/authMiddleware')
 
 // Hàm tiện ích: Tính tổng giá trị và số lượng giỏ hàng
 function calculateCartTotals(orderItems) {
@@ -104,7 +97,7 @@ router.post('/remove-product/:orderId/:productId', isAuthenticated, async (req, 
             return res.status(404).send('Sản phẩm không có trong đơn hàng.');
         }
         order.orderItems.splice(productIndex, 1);
-        await order.save(); 
+        await order.save();
         res.redirect('/orders');
     } catch (err) {
         console.error('Error removing product from order:', err);
@@ -163,6 +156,66 @@ router.post('/add/:id', isAuthenticated, async (req, res) => {
         res.status(500).send('Có lỗi xảy ra khi thêm sản phẩm vào giỏ hàng.');
     }
 });
+// Route: Cộng 1 sản phẩm vào giỏ hàng
+router.post('/increase/:id', async (req, res) => {
+    try {
+        const employeeId = req.session.employeeId;
+        const productId = req.params.id;
+
+        // Tìm đơn hàng của nhân viên
+        let order = await Order.findOne({ employeeId });
+
+        if (!order) {
+            return res.status(404).send('Đơn hàng không tồn tại.');
+        }
+
+        // Tìm sản phẩm trong orderItems
+        const item = order.orderItems.find(item => item.productId.toString() === productId);
+
+        if (item) {
+            item.quantity += 1;
+        } else {
+            return res.status(404).send('Sản phẩm không tồn tại trong đơn hàng.');
+        }
+
+        await order.save();
+        res.redirect('/orders');
+    } catch (e) {
+        console.error('Error increasing product quantity:', e);
+        res.status(500).send('Có lỗi xảy ra khi tăng số lượng sản phẩm.');
+    }
+});
+// Route: Trừ 1 sản phẩm vào giỏ hàng
+router.post('/decrease/:id', async (req, res) => {
+    try {
+        const employeeId = req.session.employeeId;
+        const productId = req.params.id;
+
+        // Tìm đơn hàng của nhân viên
+        let order = await Order.findOne({ employeeId });
+
+        if (!order) {
+            return res.status(404).send('Đơn hàng không tồn tại.');
+        }
+
+        // Tìm sản phẩm trong orderItems
+        const item = order.orderItems.find(item => item.productId.toString() === productId);
+
+        if (item) {
+            item.quantity -= 1;
+        } else {
+            return res.status(404).send('Sản phẩm không tồn tại trong đơn hàng.');
+        }
+
+        await order.save();
+        res.redirect('/orders');
+    } catch (e) {
+        console.error('Error increasing product quantity:', e);
+        res.status(500).send('Có lỗi xảy ra khi tăng số lượng sản phẩm.');
+    }
+});
+
+
 
 // Route: Thêm khách hàng vào đơn hàng
 router.get('/customer-add-order/:customerId', isAuthenticated, async (req, res) => {
@@ -174,7 +227,7 @@ router.get('/customer-add-order/:customerId', isAuthenticated, async (req, res) 
         // console.log(orderE._id);  
 
         const order = await Order.findByIdAndUpdate(
-            orderE._id, 
+            orderE._id,
             { customerId },
             { new: true }
         );
@@ -200,8 +253,8 @@ router.get('/customer-remove-order/:customerId', isAuthenticated, async (req, re
         // console.log(orderE._id);  
 
         const order = await Order.findByIdAndUpdate(
-            orderE._id, 
-            { customerId : null },
+            orderE._id,
+            { customerId: null },
             { new: true }
         );
 
@@ -216,63 +269,81 @@ router.get('/customer-remove-order/:customerId', isAuthenticated, async (req, re
     }
 });
 
-
 // Route: Xử lý thanh toán
 router.post('/checkout', isAuthenticated, async (req, res) => {
     try {
+        const employeeId = req.session?.employeeId;
+        let paymentMethod = req.body.paymentMethod;
+        const discountPercentage = parseFloat(req.body.discountPercentage) || 0;
+        const discountAmount = parseFloat(req.body.discountAmount) || 0;
+        let discount = 0;
 
-        // Tạo hóa đơn mới
-        const bill = new Bill({
-            employeeId,
-            customerId: order.customerId,
-            orderId: order._id,
-            totalAmount,
-            paymentMethod: req.body.paymentMethod,
-            // paymentStatus: 'completed',
+        // Lấy đơn hàng từ database
+        const order = await Order.findOne({ employeeId }).populate({
+            path: 'orderItems.productId',
+            model: 'Product',
         });
 
-        await bill.save(); // Lưu hóa đơn vào cơ sở dữ liệu
+        if (!order) {
+            return res.status(404).json({ message: 'Không tìm thấy đơn hàng để thanh toán' });
+        }
 
+        let totalAmount = order.totalAmount;
+
+        if (discountPercentage > 0 && discountPercentage < 100) {
+            discount = totalAmount * (discountPercentage / 100);
+            totalAmount -= discount;
+        } else if (discountPercentage >= 100) {
+            return res.status(400).json({ message: 'Giảm giá theo phần trăm phải nhỏ hơn 100%' });
+        }
+
+        if (discountAmount > 0 && discountAmount < totalAmount) {
+            totalAmount -= discountAmount;
+            discount += discountAmount;
+        } else if (discountAmount >= totalAmount) {
+            return res.status(400).json({ message: 'Giảm giá theo số tiền phải nhỏ hơn tổng tiền' });
+        }
+
+        const lastBillCode = await Bill.findOne().sort({ code: -1 });
+        const codeBill = lastBillCode ? lastBillCode.code + 1 : 1000;
+        // Tạo hóa đơn
+        await Bill.create({
+            employeeId: order.employeeId,
+            customerId: order.customerId,
+            items: order.orderItems.map(item => ({
+                productId: item.productId._id,
+                quantity: item.quantity,
+                price: item.price,
+            })),
+            paymentMethod: paymentMethod,
+            totalAmount: totalAmount,
+            discount: discount,
+            code: codeBill,
+            createdAt: new Date(),
+        });
+
+        // Giảm số lượng tồn kho của sản phẩm
+        for (let item of order.orderItems) {
+            const product = item.productId;
+            const quantityPurchased = item.quantity;
+
+            if (product.stock < quantityPurchased) {
+                return res.status(400).json({ message: `Sản phẩm ${product.name} không đủ số lượng trong kho` });
+            }
+
+            // Giảm số lượng tồn kho của sản phẩm
+            product.stock -= quantityPurchased;
+
+            // Cập nhật lại thông tin sản phẩm trong cơ sở dữ liệu
+            await product.save();
+        }
+
+        await Order.deleteOne({ _id: order._id });
         res.redirect('/orders');
     } catch (err) {
-        console.error('Error during checkout:', err);
-        res.status(500).send('Có lỗi khi thanh toán.');
+        console.error('Error processing checkout:', err);
+        res.status(500).json({ message: 'Đã có lỗi xảy ra khi xử lý thanh toán' });
     }
 });
-
-
-// Cập nhật số lượng sản phẩm
-//Cộng số lượng sản phẩm trong giỏ hàng
-
-router.post('/update-quantity/:orderId/:productId', isAuthenticated, async (req, res) => {
-    try {
-        const { orderId, productId } = req.params;
-        const order = await Order.findById(orderId);
-        if (!order) {
-            return res.status(404).send('Đơn hàng không tồn tại.');
-        }
-        const product = await Product.findById(productId);
-        if (!product) {
-            return res.status(404).send('Sản phẩm không tồn tại.');
-        }
-        // Cập nhật số lượng sản phẩm trong giỏ hàng
-        order.items.forEach((item) => {
-            if (item.productId.toString() === productId.toString()) {
-                item.quantity = req.body.quantity;
-                item.totalPrice = item.quantity * product.price;
-                // item.totalPrice = req.body.quantity * product.price;
-                }
-                });
-                await order.save();
-                res.send('Số lượng sản phẩm đã được cập nhật.');
-                } catch (err) {
-                    console.error('Error updating quantity:', err);
-                    res.status(500).send('Có lỗi khi cập nhật số lượng sản phẩm.');
-                    }
-                    });
-                    
-
-
-
 
 module.exports = router;
