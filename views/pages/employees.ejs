@@ -77,7 +77,7 @@
                                 <tr>
                                     <th scope="row">Ngày bắt đầu</th>
                                     <td>
-                                        <%= new Date(employee.startDate).toISOString().split('T')[0] %>
+                                        <%= new Date(employee.startDate).toLocaleDateString().split('T')[0] %>
                                     </td>
                                 </tr>
                                 <tr>
@@ -95,7 +95,11 @@
                                 <tr>
                                     <th scope="row">Quyền</th>
                                     <td>
-                                        <%= employee.role %>
+                                        <% if(employee.role === 'admin'){ %>
+                                            Admin
+                                            <% }else{ %>
+                                                Nhân viên
+                                                <% } %>
                                     </td>
                                 </tr>
                             </tbody>
@@ -167,39 +171,122 @@
                     </div>
                 </div>
             </div>
+            <!-- Modal sửa nhân viên -->
+            <% employees.forEach((employee)=> { %>
+                <div class="modal fade" id="editEmployeeModal<%= employee._id %>" tabindex="-1"
+                    aria-labelledby="editEmployeeModal<%= employee._id %>" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content w-100">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="editEmployeeModal<%= employee._id %>">Thông tin chi tiết
+                                    nhân
+                                    viên</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form action="/employees/edit/<%= employee.id %>" method="post" id="editEmployeeForm">
+                                    <!-- Thông tin cơ bản -->
+                                    <h6 class="text-primary mb-3">Thông tin cơ bản</h6>
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="name" class="form-label">Họ và Tên</label>
+                                            <input type="text" class="form-control form-control-lg" name="name"
+                                                id="name" placeholder="Nhập họ và tên" value="<%= employee.name %>"
+                                                required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="email" class="form-label">Email</label>
+                                            <input type="email" class="form-control form-control-lg" name="email"
+                                                id="email" placeholder="Nhập email" value="<%= employee.email %>"
+                                                required>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="phone" class="form-label">Số điện thoại</label>
+                                            <input type="text" class="form-control form-control-lg" name="phone"
+                                                id="phone" placeholder="Nhập số điện thoại"
+                                                value="<%= employee.phone %>" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="address" class="form-label">Địa chỉ</label>
+                                            <input type="text" class="form-control form-control-lg" name="address"
+                                                id="address" placeholder="Nhập địa chỉ" value="<%= employee.address %>"
+                                                required>
+                                        </div>
+                                    </div>
 
-            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+                                    <!-- Thông tin công việc -->
+                                    <h6 class="text-primary mb-3">Thông tin công việc</h6>
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="salary" class="form-label">Lương cơ bản</label>
+                                            <input type="text" class="form-control form-control-lg" name="salary"
+                                                id="salary" placeholder="Nhập lương cơ bản"
+                                                value="<%= employee.salary %>" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="role" class="form-label">Quyền nhân viên</label>
+                                            <select class="form-select form-select-lg" name="role" id="role" required>
+                                                <option value="" disabled>Chọn quyền</option>
+                                                <option value="admin" <%=employee.role==='admin' ? 'selected' : '' %>
+                                                    >Quản trị viên</option>
+                                                <option value="staff" <%=employee.role==='staff' ? 'selected' : '' %>
+                                                    >Nhân viên</option>
+                                            </select>
+                                        </div>
+                                    </div>
 
-            <script>
-                async function searchEmployee(query = '') {
-                    const resultContainer = document.getElementById('employee-list');
-                    try {
-                        const response = await fetch(`/employees/search${query.trim() ? `?q=${query}` : ''}`);
-                        const employees = await response.json();
 
-                        resultContainer.innerHTML = employees.length ?
-                            employees.map((employee, index) => `
+                                    <!-- Nút hành động -->
+                                    <div class="text-end">
+                                        <a href="/employees" class="btn btn-secondary">Hủy</a>
+                                        <button type="submit" class="btn btn-primary">Cập nhật thông tin</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <% }) %>
+
+                    <script>
+                        async function searchEmployee(query = '') {
+                            const resultContainer = document.getElementById('employee-list');
+                            try {
+                                const response = await fetch(`/employees/search${query.trim() ? `?q=${query}` : ''}`);
+                                const employees = await response.json();
+
+                                resultContainer.innerHTML = employees.length ?
+                                    employees.map((employee, index) => `
                     <tr>
                         <td>${index + 1}</td>
                         <td>${employee.name}</td>
                         <td>${employee.email}</td>
                         <td>${employee.phone}</td>
-                        <td class="d-flex justify-content-around gap-1">
-                            <a href="/employees/edit/${employee._id}" class="btn btn-warning btn-sm">Sửa</a>
-                            <a href="/employees/delete/${employee._id}" class="btn btn-danger btn-sm" onclick="return confirm('Bạn có chắc chắn muốn xóa nhân viên này?');">Xóa</a>
+                        <td class="d-flex justify-content-between gap-1">
+                            <button class="btn btn-info btn-sm w-100"  data-bs-toggle="modal" data-bs-target="#viewEmployeeModal${employee._id}">
+                            Xem 
+                            </button>
+                            <button class="btn btn-warning btn-sm w-100" data-bs-toggle="modal" data-bs-target="#editEmployeeModal${employee._id}">
+                            Sửa 
+                            </button>
+                            <a type="button" href="/employees/delete/${employee._id}" class="btn btn-danger btn-sm w-100" onclick="return confirm('Bạn có chắc chắn muốn xóa nhân viên này?');">Xóa</a>
                         </td>
                     </tr>`).join('') :
-                            '<tr><td colspan="5" class="text-center">Không có nhân viên nào.</td></tr>';
-                    } catch (error) {
-                        console.error('Lỗi khi tìm kiếm nhân viên:', error);
-                        resultContainer.innerHTML = '<tr><td colspan="5" class="text-danger text-center">Lỗi tải dữ liệu.</td></tr>';
-                    }
-                }
+                                    '<tr><td colspan="5" class="text-center">Không có nhân viên nào.</td></tr>';
+                            } catch (error) {
+                                console.error('Lỗi khi tìm kiếm nhân viên:', error);
+                                resultContainer.innerHTML = '<tr><td colspan="5" class="text-danger text-center">Lỗi tải dữ liệu.</td></tr>';
+                            }
+                        }
 
-                document.addEventListener('DOMContentLoaded', () => {
-                    searchEmployee('');
-                });
-            </script>
+                        document.addEventListener('DOMContentLoaded', () => {
+                            searchEmployee('');
+                        });
+                    </script>
+                    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

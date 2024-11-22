@@ -2,12 +2,12 @@ const mongoose = require('mongoose');
 
 const billSchema = new mongoose.Schema({
     code: Number,
-    employeeId: { type: mongoose.Schema.Types.ObjectId, ref: 'Employee', required: true },
+    employeeId: { type: mongoose.Schema.Types.ObjectId, ref: 'Employee' },
     customerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Customer' },
     items: [{
         productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
         quantity: { type: Number, min: 1 },
-        price: { type: Number  },
+        price: { type: Number },
     }],
     paymentMethod: { type: String, enum: ['cash', 'card', 'online'], default: 'cash' },
     totalAmount: { type: Number },
@@ -15,4 +15,5 @@ const billSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now },
 });
 
-module.exports = mongoose.model('Bill', billSchema);
+const Bill = mongoose.model('Bill', billSchema);
+module.exports = Bill;
