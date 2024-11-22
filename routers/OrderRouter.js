@@ -206,6 +206,10 @@ router.post('/decrease/:id', async (req, res) => {
         } else {
             return res.status(404).send('Sản phẩm không tồn tại trong đơn hàng.');
         }
+        if (item.quantity <= 0) {
+            order.orderItems = order.orderItems.filter(item => item.productId.toString() !== productId);
+
+        }
 
         await order.save();
         res.redirect('/orders');

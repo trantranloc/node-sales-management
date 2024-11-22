@@ -173,7 +173,23 @@
                                 <button type="submit" class="btn btn-outline-secondary btn-sm" name="action"
                                     value="decrease">-</button>
                             </form>
-                                <p class=" m-1 me-1 ms-1  border rounded p-2 text-center" style="width: 40px;"><%= item.quantity %></p>
+                            <p class=" m-1 me-1 ms-1  border rounded p-2 text-center" style="width: 40px;">
+                                <% if(item.productId.stock < item.quantity ) { %>
+                                    <b class="text-danger">
+                                        <%= item.quantity %>
+                                    </b>
+                                    <script>
+                                        alert('Sản phẩm nhiều hơn trong kho');
+                                    </script>
+                                    <% }else{ %>
+                                        <b class="text-dark">
+                                            <%= item.quantity %>
+                                        </b>
+                                        <% } %>
+
+                            </p>
+
+
                             <!-- Tăng số lượng -->
                             <form action="/orders/increase/<%= item.productId._id %>" method="POST" class="d-flex">
                                 <button type="submit" class="btn btn-outline-secondary btn-sm" name="action"
