@@ -1,28 +1,30 @@
 <!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Nhân viên</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
 
 <body>
-    <div class=" m-4">
+    <div class="m-4">
         <h1 class="text-center mb-4">Quản lý Nhân viên</h1>
 
-
-
-
         <!-- Thanh tìm kiếm và nút Thêm nhân viên -->
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <!-- Thanh tìm kiếm -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <!-- Thanh tìm kiếm -->
+            <input type="text" id="searchInput" class="form-control w-50" placeholder="Tìm kiếm nhân viên..."
+                onkeyup="searchEmployee(this.value)">
 
-    <input type="text" id="searchInput" class="form-control w-50" placeholder="Tìm kiếm nhân viên...">
-
-
-        <!-- Button thêm nhân viên -->
-        <div class="d-flex justify-content-end mb-3">
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">Thêm nhân
-                viên</button>
+            <!-- Button thêm nhân viên -->
+            <div class="d-flex justify-content-end mb-3">
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">Thêm nhân
+                    viên</button>
+            </div>
         </div>
-</div>
-        
-           
-     
+
         <!-- Bảng danh sách nhân viên -->
         <table class="table table-bordered table-striped">
             <thead class="table-dark">
@@ -34,50 +36,10 @@
                     <th>Thao tác</th>
                 </tr>
             </thead>
-            <tbody id="employeeTable">
-                <% employees.forEach((employee, index)=> { %> <!-- Sử dụng index để hiển thị STT tự động tăng -->
-                    <tr>
-                        <td>
-                            <%= index + 1 %>
-                        </td> <!-- Hiển thị STT tự động tăng -->
-                        <td>
-                            <%= employee.name %>
-                        </td>
-                        <td>
-                            <%= employee.email %>
-                        </td>
-
-                        <td>
-                            <%= employee.phone %>
-                        </td>
-                        <td class="d-flex justify-content-around gap-1 h-100">
-                            <!-- Thêm nút để xem, sửa, xóa với icon và ẩn chữ ở màn hình nhỏ -->
-                            <a type="button" class="btn btn-info btn-sm w-100" data-bs-toggle="modal"
-                                data-bs-target="#viewEmployeeModal<%= employee._id %>">
-                                <i class="fas fa-eye d-none d-sm-inline"></i>
-                                <span class="d-none d-sm-inline">Xem</span>
-                                <i class="fas fa-eye d-sm-none"></i>
-                            </a>
-                            <a href="employees/update/<%= employee.id %>" class="btn btn-warning btn-sm w-100"
-                                data-id="<%= employee._id %>">
-                                <i class="fas fa-edit d-none d-sm-inline"></i>
-                                <span class="d-none d-sm-inline">Sửa</span>
-                                <i class="fas fa-edit d-sm-none"></i>
-                            </a>
-                            <a href="employees/delete/<%= employee.id %>" class="btn btn-danger btn-sm w-100"
-                                onclick="return confirm('Bạn có chắc chắn muốn xóa nhân viên này?');">
-                                <i class="fas fa-trash-alt d-none d-sm-inline"></i>
-                                <span class="d-none d-sm-inline">Xóa</span>
-                                <i class="fas fa-trash-alt d-sm-none"></i>
-                            </a>
-                        </td>
-
-                    </tr>
-                    <% }) %>
-                        <!-- Thêm nhân viên tại đây -->
+            <tbody id="employee-list">
+                <!-- Employee rows will be injected here -->
             </tbody>
         </table>
-
     </div>
 
     <!-- Modal xem thông tin chi tiết -->
@@ -88,15 +50,14 @@
                 <div class="modal-content w-100">
                     <div class="modal-header">
                         <h5 class="modal-title" id="viewEmployeeModalLabel<%= employee._id %>">Thông tin chi tiết nhân
-                            viên
-                        </h5>
+                            viên</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <table class="table table-bordered">
                             <tbody>
                                 <tr>
-                                    <th scope="row" style="width: 35%;">Họ và Tên</th>
+                                    <th scope="row">Họ và Tên</th>
                                     <td>
                                         <%= employee.name %>
                                     </td>
@@ -107,7 +68,6 @@
                                         <%= employee.email %>
                                     </td>
                                 </tr>
-
                                 <tr>
                                     <th scope="row">Số điện thoại</th>
                                     <td>
@@ -115,7 +75,7 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th scope="row">Ngày bắt đầu </th>
+                                    <th scope="row">Ngày bắt đầu</th>
                                     <td>
                                         <%= new Date(employee.startDate).toISOString().split('T')[0] %>
                                     </td>
@@ -138,14 +98,6 @@
                                         <%= employee.role %>
                                     </td>
                                 </tr>
-                                <!-- <tr>
-                                    <th scope="row">
-                                        Mật khẩu
-                                    </th>
-                                    <td>
-                                        <%=employee.password %>
-                                    </td>
-                                </tr> -->
                             </tbody>
                         </table>
                     </div>
@@ -165,7 +117,6 @@
                         </div>
                         <div class="modal-body">
                             <form action="employees/add" method="post" id="addEmployeeForm">
-                                <!-- Thông tin cơ bản -->
                                 <h6 class="text-primary mb-3">Thông tin cơ bản</h6>
                                 <div class="row mb-3">
                                     <div class="col-md-6">
@@ -191,16 +142,8 @@
                                             id="address" placeholder="Nhập địa chỉ" required>
                                     </div>
                                 </div>
-
-                                <!-- Thông tin công việc -->
                                 <h6 class="text-primary mb-3">Thông tin công việc</h6>
-
                                 <div class="row mb-3">
-                                    <!-- <div class="col-md-6">
-                                        <label for="startDate" class="form-label">Ngày bắt đầu làm việc</label>
-                                        <input type="date" class="form-control form-control-lg" name="startDate"
-                                            id="startDate" required>
-                                    </div> -->
                                     <div class="col-md-6">
                                         <label for="salary" class="form-label">Lương cơ bản</label>
                                         <input type="text" class="form-control form-control-lg" name="salary"
@@ -211,16 +154,10 @@
                                         <select class="form-select form-select-lg" name="role" id="role">
                                             <option value="" disabled selected>Chọn quyền</option>
                                             <option value="admin">Quản trị viên</option>
-                                            <option value="manager">Quản lý</option>
                                             <option value="staff">Nhân viên</option>
-                                            <option value="intern">Thực tập sinh</option>
                                         </select>
                                     </div>
                                 </div>
-
-
-
-                                <!-- Nút hành động -->
                                 <div class="text-end">
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
                                     <button type="submit" class="btn btn-primary">Thêm nhân viên</button>
@@ -231,31 +168,38 @@
                 </div>
             </div>
 
-
-
-
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-            <!-- Script tìm kiếm và loc sản phẩm theo tên -->
             <script>
-                document.getElementById('searchInput').addEventListener('input', function () {
-                    const searchValue = this.value.toLowerCase().trim(); // Loại bỏ khoảng trắng thừa
-                    const rows = document.querySelectorAll('#employeeTable tr');
-            
-                    rows.forEach(row => {
-                        const name = row.querySelector('td:nth-child(2)')?.textContent.toLowerCase().trim(); // Cột Họ và Tên
-            
-                        if (name === searchValue) {
-                            row.style.display = ''; // Hiển thị hàng nếu tên trùng khớp
-                        } else {
-                            row.style.display = 'none'; // Ẩn hàng nếu không trùng khớp
-                        }
-                    });
+                async function searchEmployee(query = '') {
+                    const resultContainer = document.getElementById('employee-list');
+                    try {
+                        const response = await fetch(`/employees/search${query.trim() ? `?q=${query}` : ''}`);
+                        const employees = await response.json();
+
+                        resultContainer.innerHTML = employees.length ?
+                            employees.map((employee, index) => `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${employee.name}</td>
+                        <td>${employee.email}</td>
+                        <td>${employee.phone}</td>
+                        <td class="d-flex justify-content-around gap-1">
+                            <a href="/employees/edit/${employee._id}" class="btn btn-warning btn-sm">Sửa</a>
+                            <a href="/employees/delete/${employee._id}" class="btn btn-danger btn-sm" onclick="return confirm('Bạn có chắc chắn muốn xóa nhân viên này?');">Xóa</a>
+                        </td>
+                    </tr>`).join('') :
+                            '<tr><td colspan="5" class="text-center">Không có nhân viên nào.</td></tr>';
+                    } catch (error) {
+                        console.error('Lỗi khi tìm kiếm nhân viên:', error);
+                        resultContainer.innerHTML = '<tr><td colspan="5" class="text-danger text-center">Lỗi tải dữ liệu.</td></tr>';
+                    }
+                }
+
+                document.addEventListener('DOMContentLoaded', () => {
+                    searchEmployee('');
                 });
             </script>
-            
-            
-
 </body>
 
 </html>

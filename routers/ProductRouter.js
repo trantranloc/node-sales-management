@@ -4,6 +4,7 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const isAuthenticated = require('../middlewares/authMiddleware');
 
 // Cấu hình Multer để lưu ảnh trong thư mục "uploads"
 const storage = multer.diskStorage({
@@ -41,7 +42,7 @@ const upload = multer({
 });
 
 // Route: Danh sách sản phẩm 
-router.get('/', async (req, res) => {
+router.get('/', isAuthenticated, async (req, res) => {
     const products = await Product.find();
     res.render('layout', { content: 'pages/products', products });
 });
@@ -67,7 +68,7 @@ router.post('/add', upload.single('image'), async (req, res, next) => {
 
 
 // Route: Sửa sản phẩm
-router.post('/edit/:id', upload.single('image'), async (req, res) => {
+router.post('/edit/:id', upload.single('image'), isAuthenticated, async (req, res) => {
     const { code, name, price, discount, description, category, stock, status } = req.body;
     const product = await Product.findById(req.params.id);
     if (!product) {
@@ -100,7 +101,7 @@ router.post('/edit/:id', upload.single('image'), async (req, res) => {
 });
 
 // Route: Xóa sản phẩm
-router.get('/delete/:id', async (req, res) => {
+router.get('/delete/:id', isAuthenticated, async (req, res) => {
     const product = await Product.findById(req.params.id);
     if (!product) {
         res.status(404).send({ message: 'Product không tìm thấy.' });
@@ -112,29 +113,29 @@ router.get('/delete/:id', async (req, res) => {
 
 
 
-    
-    //Chọn danh mục sản phẩm
-    // Route: Danh sách sản phẩm với bộ lọc danh mục
-    router.get('/filter', async (req, res) => {
-        const { category } = req.query; // Lấy giá trị category từ query params
-    
-        let filter = {};
-        if (category) {
-            filter.category = category; // Lọc sản phẩm theo category nếu có
-        }
-    
-        try {
-            const products = await Product.find(filter);  // Lấy sản phẩm từ database với filter
-            res.render('layout', { content: 'pages/products', products });
-        } catch (error) {
-            console.error(error);
-            res.status(500).send('Lỗi khi lấy sản phẩm');
-        }
-    });
-    
-    
-   
-    
+
+//Chọn danh mục sản phẩm
+// Route: Danh sách sản phẩm với bộ lọc danh mục
+router.get('/filter', isAuthenticated, async (req, res) => {
+    const { category } = req.query; // Lấy giá trị category từ query params
+
+    let filter = {};
+    if (category) {
+        filter.category = category; // Lọc sản phẩm theo category nếu có
+    }
+
+    try {
+        const products = await Product.find(filter);  // Lấy sản phẩm từ database với filter
+        res.render('layout', { content: 'pages/products', products });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Lỗi khi lấy sản phẩm');
+    }
+});
+
+
+
+
 
 
 

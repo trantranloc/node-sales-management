@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-
+<style></style>
 <body>
     <!-- Danh sách sản phẩm  -->
     <div class="m-4">
@@ -22,414 +22,433 @@
                             <option value="snack">Snack</option>
                             <option value="others">Khác</option>
                         </select>
-                        
+
                     </div>
-                    
+
                 </div>
 
                 <!-- Danh sách sản phẩm -->
                 <div class="row">
                     <% products.forEach((product)=>{ %>
                         <!-- Sản phẩm  -->
-                        <div class="col-md-3 col-lg-2 mb-4" style="height:300px">
-                            <div class="card">
+                        <div class="col-md-3 col-lg-2 mb-4">
+                            <% if(product.stock> 0) { %>
+                                <div class="card" style="border:solid 1px rgb(5, 5, 5); ">
+                                    <% }else{ %>
+                                        <div class="card shadow"
+                                            style="border:solid 1px red; background-color: rgba(255, 0, 0, 0.18); ">
+                                            <% }%>
 
-                                <div class="p-2">
-                                    <img src="/<%= product.image %>" alt="<%= product.name %>" width="100%"
-                                        height="200px">
+                                                <div class="p-2 position-relative">
+                                                    <!-- Lớp phủ màu đỏ trên ảnh -->
+                                                    <div class="overlay-red"></div>
+                                                    <img src="/<%= product.image %>" alt="<%= product.name %>"
+                                                        width="100%" height="200px">
+                                                </div>
+                                                <div class="card-body">
+                                                    <h6 class="card-title">
+                                                        <%= product.name%>
+                                                    </h6>
+                                                    <p class="card-text">
+                                                        <small class="text-danger fw-bold mb-2">
+                                                            <%= product.price.toLocaleString() %>đ
+                                                        </small>
+                                                        <!-- <small class="text-muted text-decoration-line-through">55,000₫</small> -->
+                                                    </p>
+                                                    <div class="d-flex justify-content- gap-2">
+
+                                                        <button class="btn btn-outline-primary w-100"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#viewDetailProductModal<%= product._id %>">
+                                                            <i class="fa fa-eye"></i>
+                                                        </button>
+                                                        <form action="/orders/add/<%= product._id %>" method="POST">
+                                                            <button type="submit" class="btn btn-success w-100">
+                                                                <i class="fa fa-shopping-cart"></i>
+                                                            </button>
+                                                        </form>
+
+                                                    </div>
+                                                </div>
+                                        </div>
                                 </div>
-                                <div class="card-body">
-                                    <h6 class="card-title">
-                                        <%= product.name%>
-                                    </h6>
-                                    <p class="card-text">
-                                        <small class="text-danger fw-bold mb-2">
-                                            <%= product.price.toLocaleString() %>đ
-                                        </small>
-                                        <!-- <small class="text-muted text-decoration-line-through">55,000₫</small> -->
+                                <% }) %>
+                        </div>
+                </div>
+                <!-- Bộ lọc bằng checkbox bên phải -->
+                <div class="col-md-2">
+                    <button class="btn btn-success d-flex justify-content-center w-100"
+                        data-bs-target="#viewAddProductModal" data-bs-toggle="modal"><i
+                            class="fa fa-plus fa-xl pe-2 "></i>
+                        <b class="d-none d-lg-inline">Thêm sản phẩm</b></button>
+                    <form>
+                        <div class="mb-3 m-1">
+                            <label class="form-label fw-bold">Loại sản phẩm</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="food" id="checkboxFood">
+                                <label class="form-check-label" for="checkboxFood">Đồ ăn</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="drink" id="checkboxDrink">
+                                <label class="form-check-label" for="checkboxDrink">Đồ uống</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="snack" id="checkboxSnack">
+                                <label class="form-check-label" for="checkboxSnack">Đồ ăn vặt</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="dessert" id="checkboxDessert">
+                                <label class="form-check-label" for="checkboxDessert">Món tráng miệng</label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Giảm giá</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="10" id="checkboxDiscount10">
+                                <label class="form-check-label" for="checkboxDiscount10">10% trở lên</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="20" id="checkboxDiscount20">
+                                <label class="form-check-label" for="checkboxDiscount20">20% trở lên</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="30" id="checkboxDiscount30">
+                                <label class="form-check-label" for="checkboxDiscount30">30% trở lên</label>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-primary w-100">Áp dụng bộ lọc</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- Thông tin chi tiết sản phẩm -->
+        <div>
+            <% products.forEach((product)=> { %>
+                <div class="modal fade" id="viewDetailProductModal<%= product._id %>" tabindex="-1"
+                    aria-labelledby="viewDetailProductModalLabel<%= product._id %>" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="viewDetailProductModalLabel<%= product._id %>">
+                                    Chi tiết sản phẩm
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <!-- Ảnh sản phẩm -->
+                                <div class="text-center mb-4 ">
+                                    <img src="<%= product.image %>" alt="Ảnh sản phẩm" class="p-2"
+                                        style="max-height: 300px;">
+                                </div>
+                                <!-- Thông tin chi tiết -->
+                                <div class="d-flex justify-content-between w-100">
+                                    <h6 class="fw-bold">Tên sản phẩm:</h6>
+                                    <p>
+                                        <%= product.name %>
                                     </p>
-                                    <div class="d-flex justify-content- gap-2">
+                                </div>
+                                <div class="d-flex justify-content-between w-100">
+                                    <h6 class="fw-bold">Mã sản phẩm:</h6>
+                                    <p>
+                                        <%= product.code %>
+                                    </p>
+                                </div>
+                                <div class="d-flex justify-content-between w-100">
+                                    <h6 class="fw-bold">Mô tả:</h6>
+                                    <p>
+                                        <%= product.description %>
+                                    </p>
+                                </div>
 
-                                        <button class="btn btn-outline-primary w-100" data-bs-toggle="modal"
-                                            data-bs-target="#viewDetailProductModal<%= product._id %>">
-                                            <i class="fa fa-eye"></i>
-                                        </button>
-                                        <form action="/orders/add/<%= product._id %>" method="POST">
-                                            <button type="submit" class="btn btn-success w-100">
-                                                <i class="fa fa-shopping-cart"></i>
-                                            </button>
-                                        </form>
-                                    
-                                    </div>
+                                <div class="d-flex justify-content-between w-100">
+                                    <h6 class="fw-bold">Tồn kho:</h6>
+                                    <p>
+                                        <%= product.stock %>
+                                    </p>
+                                </div>
+                                <div class="d-flex justify-content-between w-100">
+                                    <h6 class="fw-bold">Danh mục:</h6>
+                                    <p>
+                                        <%= product.category %>
+                                    </p>
+                                </div>
+                                <div class="d-flex justify-content-between w-100">
+                                    <h6 class="fw-bold ">Trạng thái:</h6>
+                                    <p class="m-0 p-0">
+                                        <%= product.status==='active' ? 'Kích hoạt' : 'Không kích hoạt' %>
+                                    </p>
+                                </div>
+                                <div class="d-flex justify-content-between w-100">
+                                    <h6 class="fw-bold m-0 p-0">Giá:</h6>
+                                    <p class="m-0 p-0">
+                                        <span class="text-danger fw-bold">
+                                            <%= product.price %>₫
+                                        </span>
+                                        <% if (product.oldPrice) { %>
+                                            <small class="text-muted text-decoration-line-through">
+                                                <%= product.oldPrice %>₫
+                                            </small>
+                                            <% } %>
+                                    </p>
+                                </div>
+                                <div class="d-flex justify-content-between w-100 ">
+                                    <h6 class="fw-bold">Giảm giá:</h6>
+                                    <p>
+                                        <%= product.discount %>%
+                                    </p>
                                 </div>
                             </div>
+                            <!-- Nút hành động -->
+                            <div class="modal-footer d-flex justify-content-between">
+                                <a href="/products/delete/<%= product._id %>" type="button" class="btn btn-danger"
+                                    onclick="return confirm('Xóa sản phẩm này?')">
+                                    Xóa
+                                </a>
+                                <button data-bs-target="#viewEditProductModal<%= product._id %>" data-bs-toggle="modal"
+                                    type="button" class="btn btn-warning">
+                                    Sửa
+                                </button>
+                            </div>
                         </div>
-                        <% }) %>
+                    </div>
                 </div>
-            </div>
-            <!-- Bộ lọc bằng checkbox bên phải -->
-            <div class="col-md-2">
-                <button class="btn btn-success d-flex justify-content-center w-100"
-                    data-bs-target="#viewAddProductModal" data-bs-toggle="modal"><i class="fa fa-plus fa-xl pe-2 "></i>
-                    <b class="d-none d-lg-inline">Thêm sản phẩm</b></button>
-                <form>
-                    <div class="mb-3 m-1">
-                        <label class="form-label fw-bold">Loại sản phẩm</label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="food" id="checkboxFood">
-                            <label class="form-check-label" for="checkboxFood">Đồ ăn</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="drink" id="checkboxDrink">
-                            <label class="form-check-label" for="checkboxDrink">Đồ uống</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="snack" id="checkboxSnack">
-                            <label class="form-check-label" for="checkboxSnack">Đồ ăn vặt</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="dessert" id="checkboxDessert">
-                            <label class="form-check-label" for="checkboxDessert">Món tráng miệng</label>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Giảm giá</label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="10" id="checkboxDiscount10">
-                            <label class="form-check-label" for="checkboxDiscount10">10% trở lên</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="20" id="checkboxDiscount20">
-                            <label class="form-check-label" for="checkboxDiscount20">20% trở lên</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="30" id="checkboxDiscount30">
-                            <label class="form-check-label" for="checkboxDiscount30">30% trở lên</label>
-                        </div>
-                    </div>
-                    <button type="button" class="btn btn-primary w-100">Áp dụng bộ lọc</button>
-                </form>
-            </div>
+                <% }) %>
         </div>
-    </div>
-    <!-- Thông tin chi tiết sản phẩm -->
-    <div>
-        <% products.forEach((product)=> { %>
-            <div class="modal fade" id="viewDetailProductModal<%= product._id %>" tabindex="-1"
-                aria-labelledby="viewDetailProductModalLabel<%= product._id %>" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="viewDetailProductModalLabel<%= product._id %>">
-                                Chi tiết sản phẩm
-                            </h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <!-- Ảnh sản phẩm -->
-                            <div class="text-center mb-4 ">
-                                <img src="<%= product.image %>" alt="Ảnh sản phẩm" class="p-2"
-                                    style="max-height: 300px;">
-                            </div>
-                            <!-- Thông tin chi tiết -->
-                            <div class="d-flex justify-content-between w-100">
-                                <h6 class="fw-bold">Tên sản phẩm:</h6>
-                                <p>
-                                    <%= product.name %>
-                                </p>
-                            </div>
-                            <div class="d-flex justify-content-between w-100">
-                                <h6 class="fw-bold">Mã sản phẩm:</h6>
-                                <p>
-                                    <%= product.code %>
-                                </p>
-                            </div>
-                            <div class="d-flex justify-content-between w-100">
-                                <h6 class="fw-bold">Mô tả:</h6>
-                                <p>
-                                    <%= product.description %>
-                                </p>
-                            </div>
 
-                            <div class="d-flex justify-content-between w-100">
-                                <h6 class="fw-bold">Tồn kho:</h6>
-                                <p>
-                                    <%= product.stock %>
-                                </p>
-                            </div>
-                            <div class="d-flex justify-content-between w-100">
-                                <h6 class="fw-bold">Danh mục:</h6>
-                                <p>
-                                    <%= product.category %>
-                                </p>
-                            </div>
-                            <div class="d-flex justify-content-between w-100">
-                                <h6 class="fw-bold ">Trạng thái:</h6>
-                                <p class="m-0 p-0">
-                                    <%= product.status==='active' ? 'Kích hoạt' : 'Không kích hoạt' %>
-                                </p>
-                            </div>
-                            <div class="d-flex justify-content-between w-100">
-                                <h6 class="fw-bold m-0 p-0">Giá:</h6>
-                                <p class="m-0 p-0">
-                                    <span class="text-danger fw-bold">
-                                        <%= product.price %>₫
-                                    </span>
-                                    <% if (product.oldPrice) { %>
-                                        <small class="text-muted text-decoration-line-through">
-                                            <%= product.oldPrice %>₫
-                                        </small>
-                                        <% } %>
-                                </p>
-                            </div>
-                            <div class="d-flex justify-content-between w-100 ">
-                                <h6 class="fw-bold">Giảm giá:</h6>
-                                <p>
-                                    <%= product.discount %>%
-                                </p>
-                            </div>
-                        </div>
-                        <!-- Nút hành động -->
-                        <div class="modal-footer d-flex justify-content-between">
-                            <a href="/products/delete/<%= product._id %>" type="button" class="btn btn-danger"
-                                onclick="return confirm('Xóa sản phẩm này?')">
-                                Xóa
-                            </a>
-                            <button data-bs-target="#viewEditProductModal<%= product._id %>" data-bs-toggle="modal"
-                                type="button" class="btn btn-warning">
-                                Sửa
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <% }) %>
-    </div>
-
-    <!-- Thêm sản phẩm -->
-    <div class="modal fade" id="viewAddProductModal" tabindex="-1" aria-labelledby="viewAddProductModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-scrollable modal-lg">
-            <div class="modal-content">
-                <div class="modal-body">
-                    <form action="/products/add" method="post" class="p-4" enctype="multipart/form-data">
-                        <!-- Thông tin cơ bản -->
-                        <h4 class="text-primary mb-3">Thêm sản phẩm mới</h4>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="name" class="form-label">Tên sản phẩm</label>
-                                <input type="text" class="form-control form-control-lg" name="name" id="name"
-                                    placeholder="Nhập tên sản phẩm" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="description" class="form-label">Mô tả</label>
-                                <input type="text" class="form-control form-control-lg" name="description"
-                                    id="description" placeholder="Nhập mô tả">
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="price" class="form-label">Giá</label>
-                                <input type="number" class="form-control form-control-lg" name="price" id="price"
-                                    placeholder="Nhập giá sản phẩm" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="discount" class="form-label">Giảm giá (%)</label>
-                                <input type="number" class="form-control form-control-lg" name="discount" id="discount"
-                                    placeholder="Nhập % giảm giá" value="0">
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="stock" class="form-label">Tồn kho</label>
-                                <input type="number" class="form-control form-control-lg" name="stock" id="stock"
-                                    placeholder="Số lượng tồn kho" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="code" class="form-label">Mã sản phẩm</label>
-                                <input type="text" class="form-control form-control-lg" name="code" id="code"
-                                    placeholder="Nhập mã sản phẩm">
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="category" class="form-label">Danh mục</label>
-                                <select class="form-select form-select-lg" name="category" id="category"
-                                    aria-label=".form-select-lg example" required>
-                                    <option value="">Chọn danh mục</option>
-                                    <option value="water">Nước</option>
-                                    <option value="ice_cream">Kem</option>
-                                    <option value="noodles">Mì</option>
-                                    <option value="snack_food">Đồ ăn vặt</option>
-                                    <option value="rice">Cơm</option>
-                                    <option value="cake">Bánh</option>
-                                    <option value="candy">Kẹo</option>
-                                    <option value="beer_wine">Bia Rượu</option>
-                                    <option value="snack">Snack</option>
-                                    <option value="others">Khác</option>
-                                </select>
-
-                            </div>
-                            <div class="col-md-6">
-                                <label for="status" class="form-label">Trạng thái</label>
-                                <select class="form-select form-select-lg" name="status" id="status"
-                                    aria-label=".form-select-lg example">
-                                    <option value="active">Kích hoạt</option>
-                                    <option value="inactive">Không kích hoạt</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="image">Ảnh sản phẩm:</label>
-                                <input type="file" id="image" name="image" accept="image/*" class="form-control">
-                            </div>
-                        </div>
-                </div>
-                <!-- Nút hành động -->
-                <div class="text-end p-4">
-                    <button data-bs-dismiss="modal" class="btn btn-secondary">Hủy</button>
-                    <button type="submit" class="btn btn-primary">Thêm sản phẩm</button>
-                </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Sửa sản phẩm -->
-    <% products.forEach((product)=> { %>
-        <div class="modal fade" id="viewEditProductModal<%= product._id %>" tabindex="-1" data-bs-backdrop="static"
-            aria-labelledby="viewEditProductModalLabel" aria-hidden="true">
+        <!-- Thêm sản phẩm -->
+        <div class="modal fade" id="viewAddProductModal" tabindex="-1" aria-labelledby="viewAddProductModalLabel"
+            aria-hidden="true">
             <div class="modal-dialog modal-dialog-scrollable modal-lg">
                 <div class="modal-content">
-                    <div class="modal-body ">
-                        <form action="/products/edit/<%= product._id %>" method="post" class="p-4 pb-0"
-                            enctype="multipart/form-data">
+                    <div class="modal-body">
+                        <form action="/products/add" method="post" class="p-4" enctype="multipart/form-data">
                             <!-- Thông tin cơ bản -->
-                            <h4 class="text-primary mb-3">Chỉnh sửa sản phẩm </h4>
+                            <h4 class="text-primary mb-3">Thêm sản phẩm mới</h4>
                             <div class="row mb-3">
                                 <div class="col-md-6">
                                     <label for="name" class="form-label">Tên sản phẩm</label>
                                     <input type="text" class="form-control form-control-lg" name="name" id="name"
-                                        placeholder="Nhập tên sản phẩm" value="<%= product.name %>" required>
+                                        placeholder="Nhập tên sản phẩm" required>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="description" class="form-label">Mô tả</label>
                                     <input type="text" class="form-control form-control-lg" name="description"
-                                        id="description" placeholder="Nhập mô tả" value="<%= product.description %>">
+                                        id="description" placeholder="Nhập mô tả">
                                 </div>
                             </div>
                             <div class="row mb-3">
                                 <div class="col-md-6">
                                     <label for="price" class="form-label">Giá</label>
                                     <input type="number" class="form-control form-control-lg" name="price" id="price"
-                                        placeholder="Nhập giá sản phẩm" value="<%= product.price %>" required>
+                                        placeholder="Nhập giá sản phẩm" required>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="discount" class="form-label">Giảm giá (%)</label>
                                     <input type="number" class="form-control form-control-lg" name="discount"
-                                        id="discount" placeholder="Nhập % giảm giá"
-                                        value="<%= product.discount || 0 %>">
+                                        id="discount" placeholder="Nhập % giảm giá" value="0">
                                 </div>
                             </div>
                             <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label for="code" class="form-label">Mã sản phẩm</label>
-                                    <input type="text" class="form-control form-control-lg" name="code" id="code"
-                                        placeholder="Nhập mã sản phẩm" value="<%= product.code %>">
-                                </div>
                                 <div class="col-md-6">
                                     <label for="stock" class="form-label">Tồn kho</label>
                                     <input type="number" class="form-control form-control-lg" name="stock" id="stock"
-                                        placeholder="Nhập số lượng tồn kho" value="<%= product.stock || 0 %>">
+                                        placeholder="Số lượng tồn kho" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="code" class="form-label">Mã sản phẩm</label>
+                                    <input type="text" class="form-control form-control-lg" name="code" id="code"
+                                        placeholder="Nhập mã sản phẩm">
                                 </div>
                             </div>
                             <div class="row mb-3">
                                 <div class="col-md-6">
-                                    <label for="status" class="form-label">Trạng thái</label>
-                                    <select class="form-select form-select-lg" name="status" id="status">
-                                        <option value="active" <%=product.status==='active' ? 'selected' : '' %>>Kích
-                                            hoạt
-                                        </option>
-                                        <option value="inactive" <%=product.status==='inactive' ? 'selected' : '' %>
-                                            >Không
-                                            kích hoạt</option>
+                                    <label for="category" class="form-label">Danh mục</label>
+                                    <select class="form-select form-select-lg" name="category" id="category"
+                                        aria-label=".form-select-lg example" required>
+                                        <option value="">Chọn danh mục</option>
+                                        <option value="water">Nước</option>
+                                        <option value="ice_cream">Kem</option>
+                                        <option value="noodles">Mì</option>
+                                        <option value="snack_food">Đồ ăn vặt</option>
+                                        <option value="rice">Cơm</option>
+                                        <option value="cake">Bánh</option>
+                                        <option value="candy">Kẹo</option>
+                                        <option value="beer_wine">Bia Rượu</option>
+                                        <option value="snack">Snack</option>
+                                        <option value="others">Khác</option>
                                     </select>
+
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="category" class="form-label">Category</label>
-                                    <select class="form-select form-select-lg" name="category" id="category">
-                                        <option value="water" <%=product.category==='water' ? 'selected' : '' %>>Nước
-                                        </option>
-                                        <option value="ice_cream" <%=product.category==='ice_cream' ? 'selected' : '' %>
-                                            >Kem</option>
-                                        <option value="noodles" <%=product.category==='noodles' ? 'selected' : '' %>>Mì
-                                        </option>
-                                        <option value="rice" <%=product.category==='rice' ? 'selected' : '' %>
-                                            >Cơm
-                                        </option>
-                                        <option value="cake" <%=product.category==='cake' ? 'selected' : '' %>
-                                            >Bánh
-                                        </option>
-                                        <option value="candy" <%=product.category==='candy' ? 'selected' : '' %>
-                                            >Kẹo
-                                        </option>
-                                        <option value="beer_wine" <%=product.category==='beer_wine' ? 'selected' : '' %>
-                                            >Bia Rượu</option>
-                                        <option value="snack" <%=product.category==='snack' ? 'selected' : '' %>
-                                            >Snack
-                                        </option>
-                                        <option value="water" <%=product.category==='water' ? 'selected' : '' %>
-                                            >Nước</option>
-                                        <option value="snack_food" <%=product.category==='snack_food' ? 'selected' : '' %>
-                                            >Đồ ăn vặt</option>
-                                        <option value="others" <%=product.category==='others' ? 'selected' : '' %>
-                                            >Others</option>
-                                            
+                                    <label for="status" class="form-label">Trạng thái</label>
+                                    <select class="form-select form-select-lg" name="status" id="status"
+                                        aria-label=".form-select-lg example">
+                                        <option value="active">Kích hoạt</option>
+                                        <option value="inactive">Không kích hoạt</option>
                                     </select>
                                 </div>
-
                             </div>
                             <div class="row mb-3">
                                 <div class="col-md-6">
                                     <label for="image">Ảnh sản phẩm:</label>
-                                    <input type="file" id="image" name="image" accept="image/*"
-                                        class="form-control"><br><br>
-                                </div>
-                                <div class="col-md-6">
-                                    <img src="<%= product.image %>" alt="Ảnh sản phẩm" class="img-fluid w-100 "
-                                        style="height: 200px;">
+                                    <input type="file" id="image" name="image" accept="image/*" class="form-control">
                                 </div>
                             </div>
                     </div>
                     <!-- Nút hành động -->
                     <div class="text-end p-4">
-                        <a href="/products" class="btn btn-secondary">Hủy</a>
-                        <button type="submit" class="btn btn-primary">Cập nhật</button>
+                        <button data-bs-dismiss="modal" class="btn btn-secondary">Hủy</button>
+                        <button type="submit" class="btn btn-primary">Thêm sản phẩm</button>
                     </div>
                     </form>
                 </div>
             </div>
         </div>
-        <% }) %>
+
+        <!-- Sửa sản phẩm -->
+        <% products.forEach((product)=> { %>
+            <div class="modal fade" id="viewEditProductModal<%= product._id %>" tabindex="-1" data-bs-backdrop="static"
+                aria-labelledby="viewEditProductModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-scrollable modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-body ">
+                            <form action="/products/edit/<%= product._id %>" method="post" class="p-4 pb-0"
+                                enctype="multipart/form-data">
+                                <!-- Thông tin cơ bản -->
+                                <h4 class="text-primary mb-3">Chỉnh sửa sản phẩm </h4>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="name" class="form-label">Tên sản phẩm</label>
+                                        <input type="text" class="form-control form-control-lg" name="name" id="name"
+                                            placeholder="Nhập tên sản phẩm" value="<%= product.name %>" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="description" class="form-label">Mô tả</label>
+                                        <input type="text" class="form-control form-control-lg" name="description"
+                                            id="description" placeholder="Nhập mô tả"
+                                            value="<%= product.description %>">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="price" class="form-label">Giá</label>
+                                        <input type="number" class="form-control form-control-lg" name="price"
+                                            id="price" placeholder="Nhập giá sản phẩm" value="<%= product.price %>"
+                                            required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="discount" class="form-label">Giảm giá (%)</label>
+                                        <input type="number" class="form-control form-control-lg" name="discount"
+                                            id="discount" placeholder="Nhập % giảm giá"
+                                            value="<%= product.discount || 0 %>">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="code" class="form-label">Mã sản phẩm</label>
+                                        <input type="text" class="form-control form-control-lg" name="code" id="code"
+                                            placeholder="Nhập mã sản phẩm" value="<%= product.code %>">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="stock" class="form-label">Tồn kho</label>
+                                        <input type="number" class="form-control form-control-lg" name="stock"
+                                            id="stock" placeholder="Nhập số lượng tồn kho"
+                                            value="<%= product.stock || 0 %>">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="status" class="form-label">Trạng thái</label>
+                                        <select class="form-select form-select-lg" name="status" id="status">
+                                            <option value="active" <%=product.status==='active' ? 'selected' : '' %>
+                                                >Kích
+                                                hoạt
+                                            </option>
+                                            <option value="inactive" <%=product.status==='inactive' ? 'selected' : '' %>
+                                                >Không
+                                                kích hoạt</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="category" class="form-label">Category</label>
+                                        <select class="form-select form-select-lg" name="category" id="category">
+                                            <option value="water" <%=product.category==='water' ? 'selected' : '' %>
+                                                >Nước
+                                            </option>
+                                            <option value="ice_cream" <%=product.category==='ice_cream' ? 'selected'
+                                                : '' %>
+                                                >Kem</option>
+                                            <option value="noodles" <%=product.category==='noodles' ? 'selected' : '' %>
+                                                >Mì
+                                            </option>
+                                            <option value="rice" <%=product.category==='rice' ? 'selected' : '' %>
+                                                >Cơm
+                                            </option>
+                                            <option value="cake" <%=product.category==='cake' ? 'selected' : '' %>
+                                                >Bánh
+                                            </option>
+                                            <option value="candy" <%=product.category==='candy' ? 'selected' : '' %>
+                                                >Kẹo
+                                            </option>
+                                            <option value="beer_wine" <%=product.category==='beer_wine' ? 'selected'
+                                                : '' %>
+                                                >Bia Rượu</option>
+                                            <option value="snack" <%=product.category==='snack' ? 'selected' : '' %>
+                                                >Snack
+                                            </option>
+                                            <option value="water" <%=product.category==='water' ? 'selected' : '' %>
+                                                >Nước</option>
+                                            <option value="snack_food" <%=product.category==='snack_food' ? 'selected'
+                                                : '' %>
+                                                >Đồ ăn vặt</option>
+                                            <option value="others" <%=product.category==='others' ? 'selected' : '' %>
+                                                >Others</option>
+
+                                        </select>
+                                    </div>
+
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="image">Ảnh sản phẩm:</label>
+                                        <input type="file" id="image" name="image" accept="image/*"
+                                            class="form-control"><br><br>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <img src="<%= product.image %>" alt="Ảnh sản phẩm" class="img-fluid w-100 "
+                                            style="height: 200px;">
+                                    </div>
+                                </div>
+                        </div>
+                        <!-- Nút hành động -->
+                        <div class="text-end p-4">
+                            <a href="/products" class="btn btn-secondary">Hủy</a>
+                            <button type="submit" class="btn btn-primary">Cập nhật</button>
+                        </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <% }) %>
 
 
 
 
-            <!-- Bootstrap JS Bundle -->
-            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-            <!-- Lọc sản phẩm theo danh mục  -->
-            <script>
-                document.getElementById('categoryFilter').addEventListener('change', function() {
-                    var category = this.value;  // Lấy giá trị danh mục đã chọn
-                    var url = category ? `/products/filter?category=${category}` : '/products';  // Nếu có danh mục thì thêm vào URL
-            
-                    // Chuyển hướng đến URL tương ứng
-                    window.location.href = url;
-                });
-            </script>
-            
-            
+                <!-- Bootstrap JS Bundle -->
+                <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+                <!-- Lọc sản phẩm theo danh mục  -->
+                <script>
+                    document.getElementById('categoryFilter').addEventListener('change', function () {
+                        var category = this.value;  // Lấy giá trị danh mục đã chọn
+                        var url = category ? `/products/filter?category=${category}` : '/products';  // Nếu có danh mục thì thêm vào URL
 
-            
+                        // Chuyển hướng đến URL tương ứng
+                        window.location.href = url;
+                    });
+                </script>
+
+
+
+
 </body>

@@ -11,7 +11,7 @@ const handleError = (res, error, message = 'Đã xảy ra lỗi', statusCode = 5
 };
 
 // Route: Lấy danh sách nhân viên
-router.get('/', async (req, res) => {
+router.get('/', isAuthenticated, async (req, res) => {
     try {
         const employees = await Employee.find();
         res.render('layout', { content: 'pages/employees', employees });
@@ -21,7 +21,7 @@ router.get('/', async (req, res) => {
 });
 
 // Route: Thêm nhân viên mới
-router.post('/add', async (req, res) => {
+router.post('/add', isAuthenticated, async (req, res) => {
     try {
         const {
             name, email, password = "123456", phone, address, salary, role
@@ -47,7 +47,7 @@ router.post('/add', async (req, res) => {
 });
 
 // Route: Xóa nhân viên
-router.get('/delete/:id', async (req, res) => {
+router.get('/delete/:id', isAuthenticated, async (req, res) => {
     try {
         const { id } = req.params;
         const employee = await Employee.findById(id);
@@ -62,7 +62,7 @@ router.get('/delete/:id', async (req, res) => {
 });
 
 // Route: Hiển thị form sửa nhân viên
-router.get('/update/:id', async (req, res) => {
+router.get('/update/:id', isAuthenticated, async (req, res) => {
     try {
         const { id } = req.params;
         const employee = await Employee.findById(id);
@@ -76,7 +76,7 @@ router.get('/update/:id', async (req, res) => {
 });
 
 // Route: Cập nhật thông tin nhân viên
-router.post('/update/:id', async (req, res) => {
+router.post('/update/:id', isAuthenticated, async (req, res) => {
     try {
         const { id } = req.params;
         const { name, email, phone, address, position, shift, salary, role } = req.body;
@@ -96,7 +96,7 @@ router.post('/update/:id', async (req, res) => {
 });
 
 // Route: Xem thông tin chi tiết nhân viên
-router.get('/detail/:id', async (req, res) => {
+router.get('/detail/:id', isAuthenticated, async (req, res) => {
     try {
         const { id } = req.params;
         const employee = await Employee.findById(id);
@@ -109,28 +109,20 @@ router.get('/detail/:id', async (req, res) => {
     }
 });
 // Route: Tìm kiếm nhân viên
-router.get('/search', async (req, res) => {
-    const searchQuery = req.query.q || '';
-
-    // Kiểm tra đầu vào
-    if (!searchQuery.trim()) {
-        return res.status(400).send('Vui lòng nhập từ khóa tìm kiếm.');
-    }
-
+router.get('/search', isAuthenticated, async (req, res) => {
+    const searchQuery = req.query.q;
     try {
-        // Tìm kiếm nhân viên theo tên
-        const employees = await Employee.find({
-            $or: [
-                { name: { $regex: searchQuery, $options: 'i' } },
-            ],
-        });
-
-        
-        res.redirect("/employees")
-
-    } catch (err) {
-        console.error('Error searching employees:', err);
-        res.status(500).send('Có lỗi xảy ra khi tìm kiếm nhân viên.');
+        employee = searchQuery
+            ? await Employee.find({
+                $or: [
+                    { name: { $regex: searchQuery, $options: 'i' } }, // Tìm kiếm tên sản phẩm
+                    { phone: { $regex: searchQuery, $options: 'i' } }, // Tìm kiếm mã sản phẩm
+                    { email: { $regex: searchQuery, $options: 'i' } }
+                ]
+            }) : await Employee.find();
+        res.json(employee);
+    } catch (error) { 
+        console.log(error);
     }
 });
 
