@@ -153,7 +153,7 @@
                                 </td> <!-- Tổng số tiền -->
                                 <td>
                                     <button class="btn btn-detail btn-sm" data-bs-toggle="modal"
-                                        data-bs-target="#viewDetailBillModal" data-bill-id="<%= bill._id %>">Chi
+                                        data-bs-target="#viewDetailBillModal<%= bill._id%>" data-bill-id="<%= bill._id %>">Chi
                                         tiết</button>
                                 </td>
                             </tr>
@@ -165,8 +165,7 @@
     </div>
     <!-- Hiển thị chi tiết đơn hàng   -->
     <% bills.forEach((bill)=> { %>
-
-        <div class="modal fade" id="viewDetailBillModal" tabindex="-1" aria-labelledby="viewDetailBillModalLabel"
+        <div class="modal fade" id="viewDetailBillModal<%= bill._id%>" tabindex="-1" aria-labelledby="viewDetailBillModalLabel"
             aria-hidden="true">
             <div class="modal-dialog modal-dialog-scrollable   modal-lg">
                 <div class="modal-content">
