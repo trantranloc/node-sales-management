@@ -179,7 +179,7 @@
                                         <%= item.quantity %>
                                     </b>
                                     <script>
-                                        alert('Sản phẩm nhiều hơn trong kho');
+                                        alert('Sản phẩm không đủ trong kho');
                                     </script>
                                     <% }else{ %>
                                         <b class="text-dark">
@@ -505,16 +505,16 @@
             const errorMessage = document.getElementById('error-message-percentage');
 
             if (discountPercentage > 100) {
-                errorMessage.style.display = 'block'; // Hiển thị thông báo lỗi nếu giảm giá > 100%
+                errorMessage.style.display = 'block'; 
             } else {
-                errorMessage.style.display = 'none'; // Ẩn thông báo lỗi nếu giảm giá <= 100%
+                errorMessage.style.display = 'none'; 
             }
         }
 
         // Hàm kiểm tra Giảm giá theo số tiền
         function checkDiscountAmount() {
             const discountAmount = parseFloat(document.getElementById('discountAmount').value);
-            const totalPrice = parseFloat('<%= totalPrice %>'); // Lấy giá trị totalPrice từ EJS
+            const totalPrice = parseFloat('<%= totalPrice %>');
             const errorMessageAmount = document.getElementById('error-message-amount');
 
             if (discountAmount > totalPrice) {
