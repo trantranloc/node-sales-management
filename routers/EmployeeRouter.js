@@ -19,10 +19,12 @@ router.get('/', isAuthenticated, async (req, res) => {
 router.post('/add', isAuthenticated, async (req, res) => {
     try {
         const { name, email, password = "123456", phone, address, salary, role } = req.body;
-
+        const employeeCount = await Employee.countDocuments();
+        const username = `NV${employeeCount + 1}`;
         const hashedPassword = await bcrypt.hash(password, 10);
         const newEmployee = new Employee({
             name,
+            username,
             email,
             password: hashedPassword,
             phone,
@@ -99,8 +101,8 @@ router.get('/search', isAuthenticated, async (req, res) => {
         const employee = searchQuery
             ? await Employee.find({
                 $or: [
-                    { name: { $regex: searchQuery, $options: 'i' } }, 
-                    { phone: { $regex: searchQuery, $options: 'i' } }, 
+                    { name: { $regex: searchQuery, $options: 'i' } },
+                    { phone: { $regex: searchQuery, $options: 'i' } },
                     { email: { $regex: searchQuery, $options: 'i' } }
                 ]
             }) : await Employee.find();

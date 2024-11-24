@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const employeeSchema = new mongoose.Schema({
     name: { type: String, required: true },
+    username: { type: String},
     email: { type: String, unique: true },
     password: { type: String, minlength: 3, default: "123456" },
     phone: { type: String },

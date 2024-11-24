@@ -30,6 +30,7 @@
             <thead class="table-dark">
                 <tr>
                     <th>STT</th>
+                    <th>Mã nhân viên</th>
                     <th>Họ và Tên</th>
                     <th>Email</th>
                     <th>Số điện thoại</th>
@@ -262,6 +263,7 @@
                                     employees.map((employee, index) => `
                     <tr>
                         <td>${index + 1}</td>
+                        <td>${employee.username}</td>
                         <td>${employee.name}</td>
                         <td>${employee.email}</td>
                         <td>${employee.phone}</td>
