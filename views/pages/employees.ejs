@@ -102,6 +102,11 @@
                                                 Nhân viên
                                                 <% } %>
                                     </td>
+                                    <!-- Form để xác nhận hành động đặt lại mật khẩu -->
+                                    <form action="employees/reset-password/<%= employee._id %>" method="post">
+                                        <button type="submit" class="btn btn-success">Đặt lại mật khẩu</button>
+                                    </form>
+
                                 </tr>
                             </tbody>
                         </table>

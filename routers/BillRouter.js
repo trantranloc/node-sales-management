@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const moment = require('moment-timezone');
 const Bill = require('../models/Bill');
-const isAuthenticated = require('../middlewares/authMiddleware');
+const { isAuthenticated, isAdmin } = require('../middlewares/authMiddleware');
 
 
 // Route: Hiển thị danh sách hoá đơn

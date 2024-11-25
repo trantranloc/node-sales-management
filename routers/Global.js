@@ -1,7 +1,7 @@
 const express = require('express');
 const Employee = require('../models/Employee');
 const bcrypt = require('bcrypt');
-const isAuthenticated = require('../middlewares/authMiddleware');
+const { isAuthenticated,isAdmin } = require('../middlewares/authMiddleware');
 const router = express.Router();
 const Bill = require('../models/Bill');
 const moment = require('moment-timezone');

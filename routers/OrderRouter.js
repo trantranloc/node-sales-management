@@ -3,7 +3,7 @@ const router = express.Router();
 const Order = require('../models/Order');
 const Product = require('../models/Product');
 const Bill = require('../models/Bill');
-const isAuthenticated = require('../middlewares/authMiddleware');
+const { isAuthenticated, isAdmin } = require('../middlewares/authMiddleware');
 const Customer = require('../models/Customer');
 
 // Route: Hiển thị giỏ hàng
