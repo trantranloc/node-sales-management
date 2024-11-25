@@ -14,20 +14,5 @@ const billSchema = new mongoose.Schema({
     discount: Number,
     createdAt: { type: Date, default: Date.now },
 });
-// // Middleware: Phát sự kiện khi có thay đổi hoá đơn
-// billSchema.post('save', async function (doc) {
-//     const totalRevenue = await mongoose.model('Bill').aggregate([
-//         { 
-//             $group: { 
-//                 _id: null, 
-//                 total: { $sum: '$totalAmount' } 
-//             }
-//         }
-//     ]);
-
-//     const revenue = totalRevenue[0]?.total || 0;
-//     revenueEmitter.emit('revenueUpdated', revenue); // Phát sự kiện
-// });
-
 const Bill = mongoose.model('Bill', billSchema);
 module.exports = Bill;
