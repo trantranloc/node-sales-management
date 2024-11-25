@@ -12,6 +12,7 @@ const ONE_HOUR_AGO = moment().subtract(1, 'hours').toDate(); // Đơn hàng mớ
 // Route cho trang chủ// Route cho trang tổng quan
 //edit lại để lấy doanh thu cho trang overview.ejs
 const Product = require('../models/Product'); // Giả sử bạn có mô hình Product
+const mongoose = require('mongoose');
 
 
 router.get('/', isAuthenticated, async (req, res) => {
@@ -20,7 +21,10 @@ router.get('/', isAuthenticated, async (req, res) => {
         const selectedDate = req.query.selectedDate || moment().tz('Asia/Ho_Chi_Minh').format('YYYY-MM-DD');
         const startOfDay = moment(selectedDate).startOf('day').toDate();
         const endOfDay = moment(selectedDate).endOf('day').toDate();
+        
 
+        
+       
 
 
          // Lấy các đơn hàng mới để cập nhật ở overview.ejs
@@ -46,6 +50,31 @@ router.get('/', isAuthenticated, async (req, res) => {
             employeeId,
             createdAt: { $gte: startOfDay, $lte: endOfDay }
         }).populate('items.productId'); // Giả sử mỗi hóa đơn có trường "items" chứa sản phẩm
+         // 1. Dữ liệu cho biểu đồ doanh thu theo tháng
+         const monthlyRevenue = Array(12).fill(0);
+         bills.forEach((bill) => {
+             const billMonth = moment(bill.createdAt).month(); // Lấy tháng từ hóa đơn
+             bill.items.forEach((item) => {
+                 const totalItemRevenue = (item.productId.price || 0) * item.quantity;
+                 monthlyRevenue[billMonth] += totalItemRevenue; // Cộng doanh thu vào tháng tương ứng
+             });
+         });
+          // 2. Dữ liệu cho biểu đồ tỷ lệ danh mục sản phẩm
+        const categorySales = {};
+        bills.forEach((bill) => {
+            bill.items.forEach((item) => {
+                const categoryName = item.productId.category || 'Khác'; // Lấy danh mục sản phẩm
+                if (!categorySales[categoryName]) {
+                    categorySales[categoryName] = 0;
+                }
+                categorySales[categoryName] += item.quantity; // Tính tổng số lượng bán
+            });
+        });
+        const categoryLabels = Object.keys(categorySales); // Danh mục
+        const categoryData = Object.values(categorySales); // Số lượng bán được
+
+
+
         // Tính lại totalAmount cho từng hóa đơn (để đảm bảo dữ liệu đồng nhất)
         bills.forEach((bill) => {
             bill.totalAmount = bill.items.reduce((total, item) => {
@@ -99,13 +128,17 @@ router.get('/', isAuthenticated, async (req, res) => {
             content: 'pages/overview',
             employeeId,
             role: req.session.role,
-            todayRevenue,
+            todayRevenue: bills.reduce((acc, bill) => acc + bill.totalAmount, 0), // Tổng doanh thu hôm nay
+            monthlyRevenue, // Dữ liệu cho biểu đồ doanh thu theo tháng
+            categoryLabels, // Danh mục sản phẩm
+            categoryData, // Dữ liệu tỷ lệ danh mục sản phẩm
             bestSellingProduct, // Truyền sản phẩm bán chạy nhất
             maxQuantity, // Số lượng bán được của sản phẩm bán chạy nhất
             selectedDate,
             lowStockProducts, // Truyền danh sách sản phẩm gần hết hàng
             bills,
-            newOrders // Thêm danh sách đơn hàng mới
+            newOrders,// Thêm danh sách đơn hàng mới
+            // Sản phẩm bán chạy 
         });
 
     } catch (err) {

@@ -172,63 +172,66 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Biểu đồ doanh thu theo tháng
-        const monthlyLabels = ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6'];
-        const monthlyData = [15000000, 20000000, 18000000, 22000000, 24000000, 30000000];
+    document.addEventListener('DOMContentLoaded', function () {
+        // Kiểm tra dữ liệu JSON trực tiếp trong EJS
+        try {
+            const monthlyRevenue = JSON.parse('<%- JSON.stringify(monthlyRevenue || []) %>');
+            const categoryLabels = JSON.parse('<%- JSON.stringify(categoryLabels || []) %>');
+            const categoryData = JSON.parse('<%- JSON.stringify(categoryData || []) %>');
 
-        const ctxRevenue = document.getElementById('monthlyRevenueChart').getContext('2d');
-        const monthlyRevenueChart = new Chart(ctxRevenue, {
-            type: 'bar', // Biểu đồ cột
-            data: {
-                labels: monthlyLabels,
-                datasets: [{
-                    label: 'Doanh thu (VNĐ)',
-                    data: monthlyData,
-                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top'
-                    }
+            // Biểu đồ doanh thu theo tháng
+            const monthlyLabels = [
+                'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 
+                'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 
+                'Tháng 10', 'Tháng 11', 'Tháng 12'
+            ];
+
+            const ctxRevenue = document.getElementById('monthlyRevenueChart').getContext('2d');
+            new Chart(ctxRevenue, {
+                type: 'bar',
+                data: {
+                    labels: monthlyLabels,
+                    datasets: [{
+                        label: 'Doanh thu (VNĐ)',
+                        data: monthlyRevenue,
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1,
+                    }],
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: true, position: 'top' },
+                    },
+                    scales: { 
+                        y: { 
+                            beginAtZero: true 
+                        } 
+                    },
+                },
+            });
 
-        // Biểu đồ tỷ lệ danh mục sản phẩm
-        const categoryLabels = ['Nước', 'Đồ ăn vặt', 'Cơm', 'Khác'];
-        const categoryData = [40, 30, 20, 10];
-
-        const ctxCategory = document.getElementById('categoryPieChart').getContext('2d');
-        const categoryPieChart = new Chart(ctxCategory, {
-            type: 'pie', // Biểu đồ tròn
-            data: {
-                labels: categoryLabels,
-                datasets: [{
-                    data: categoryData,
-                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'],
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top'
-                    }
-                }
-            }
-        });
+            // Biểu đồ tỷ lệ danh mục sản phẩm
+            const ctxCategory = document.getElementById('categoryPieChart').getContext('2d');
+            new Chart(ctxCategory, {
+                type: 'pie',
+                data: {
+                    labels: categoryLabels,
+                    datasets: [{
+                        data: categoryData,
+                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'],
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: true, position: 'top' },
+                    },
+                },
+            });
+        } catch (error) {
+            console.error('Error rendering charts:', error);
+        }
     });
 </script>
