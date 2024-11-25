@@ -14,6 +14,5 @@ const billSchema = new mongoose.Schema({
     discount: Number,
     createdAt: { type: Date, default: Date.now },
 });
-
 const Bill = mongoose.model('Bill', billSchema);
 module.exports = Bill;
