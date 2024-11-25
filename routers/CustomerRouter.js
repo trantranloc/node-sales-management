@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Customer = require('../models/Customer');
-const isAuthenticated = require('../middlewares/authMiddleware');
+const { isAuthenticated, isAdmin } = require('../middlewares/authMiddleware');
 
 // Route: Hiển thị danh sách khách hàng
 router.get('/', async (req, res) => {
