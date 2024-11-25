@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const Employee = require('../models/Employee');
-const isAuthenticated = require('../middlewares/authMiddleware');
+const { isAuthenticated } = require('../middlewares/authMiddleware');
 
 // Route: Lấy danh sách nhân viên
 router.get('/', isAuthenticated, async (req, res) => {
@@ -141,4 +141,22 @@ router.post('/change-password/:employeeId', isAuthenticated, async (req, res) =>
     }
 });
 
+// Router: Cập nhật lại mật khẩu thành mạc định
+router.post('/reset-password/:employeeId', isAuthenticated, async (req, res) => {
+    try {
+        const { employeeId } = req.params;
+        const newPassword = "123456";
+        // Lấy thông tin nhân viên
+        const employee = await Employee.findById(employeeId);
+        if (!employee) return res.status(404).send('Nhân viên không tồn tại');
+        // Hash mật khẩu mới và cập nhật
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        employee.password = hashedPassword;
+        await employee.save();
+        res.redirect(`/employees/detail/${employeeId}`);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Lỗi khi cập nhật lại mật khẩu');
+    }
+});
 module.exports = router;

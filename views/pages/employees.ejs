@@ -96,12 +96,16 @@
                                 <tr>
                                     <th scope="row">Quyền</th>
                                     <td>
-                                        <% if(employee.role === 'admin'){ %>
+                                        <% if(employee.role==='admin' ){ %>
                                             Admin
                                             <% }else{ %>
                                                 Nhân viên
                                                 <% } %>
                                     </td>
+                                    <form action="employees/reset-password/<%= employee._id %>" method="POST"
+                                        onsubmit="return confirm('Bạn có muốn cài lại mật khẩu mặc định không?');">
+                                        <button type="submit" class="btn btn-success m-2">Đặt lại mật khẩu</button>
+                                    </form>
                                 </tr>
                             </tbody>
                         </table>
