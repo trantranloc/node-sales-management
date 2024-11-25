@@ -4,12 +4,124 @@ const bcrypt = require('bcrypt');
 const isAuthenticated = require('../middlewares/authMiddleware');
 const router = express.Router();
 
-// Route cho trang chủ
-router.get('/',isAuthenticated, (req, res) => {
+
+const Bill = require('../models/Bill');
+const moment = require('moment-timezone');
+const ONE_HOUR_AGO = moment().subtract(1, 'hours').toDate(); // Đơn hàng mới trong 1 giờ qua
+
+// Route cho trang chủ// Route cho trang tổng quan
+//edit lại để lấy doanh thu cho trang overview.ejs
+const Product = require('../models/Product'); // Giả sử bạn có mô hình Product
+
+
+router.get('/', isAuthenticated, async (req, res) => {
+    try {
+        const employeeId = req.session.employeeId;
+        const selectedDate = req.query.selectedDate || moment().tz('Asia/Ho_Chi_Minh').format('YYYY-MM-DD');
+        const startOfDay = moment(selectedDate).startOf('day').toDate();
+        const endOfDay = moment(selectedDate).endOf('day').toDate();
+
+
+
+         // Lấy các đơn hàng mới để cập nhật ở overview.ejs
+         const newOrders = await Bill.find({
+            employeeId,
+            createdAt: { $gte: ONE_HOUR_AGO }
+        }).populate('items.productId')
+        .populate('customerId');
+          // Tính toán tổng tiền cho từng hóa đơn ở phần đơn hàng mới 
+          newOrders.forEach((bill) => {
+            bill.totalAmount = bill.items.reduce((total, item) => {
+                const productPrice = item.productId.price || 0; // Giá sản phẩm
+                const quantity = item.quantity || 0; // Số lượng sản phẩm
+                return total + productPrice * quantity; // Tính tổng
+            }, 0);
+        });
+
+
+         
+
+        // Lấy tất cả các hóa đơn trong ngày đã chọn
+        const bills = await Bill.find({
+            employeeId,
+            createdAt: { $gte: startOfDay, $lte: endOfDay }
+        }).populate('items.productId'); // Giả sử mỗi hóa đơn có trường "items" chứa sản phẩm
+        // Tính lại totalAmount cho từng hóa đơn (để đảm bảo dữ liệu đồng nhất)
+        bills.forEach((bill) => {
+            bill.totalAmount = bill.items.reduce((total, item) => {
+                const productPrice = item.productId.price || 0;
+                const quantity = item.quantity || 0;
+                return total + productPrice * quantity;
+            }, 0);
+        });
+        // Tính tổng doanh thu hôm nay
+        const todayRevenue = bills.reduce((acc, bill) => acc + bill.totalAmount, 0);
+
+        // Đếm số lượng sản phẩm bán được
+        const productSalesCount = {};
+
+        bills.forEach(bill => {
+            bill.items.forEach(item => {
+                const productId = item.productId._id.toString();
+                const quantity = item.quantity;
+
+                // Cộng dồn số lượng sản phẩm bán được
+                if (productSalesCount[productId]) {
+                    productSalesCount[productId] += quantity;
+                } else {
+                    productSalesCount[productId] = quantity;
+                }
+            });
+        });
+
+        // Tìm sản phẩm bán chạy nhất (theo số lượng)
+        let bestSellingProductId = null;
+        let maxQuantity = 0;
+
+        for (const productId in productSalesCount) {
+            if (productSalesCount[productId] > maxQuantity) {
+                maxQuantity = productSalesCount[productId];
+                bestSellingProductId = productId;
+            }
+        }
+
+        // Lấy thông tin chi tiết của sản phẩm bán chạy nhất
+        let bestSellingProduct = null;
+        if (bestSellingProductId) {
+            bestSellingProduct = await Product.findById(bestSellingProductId);
+        }
+
+        // Lấy danh sách các sản phẩm gần hết hàng (stock < 10)
+        const lowStockProducts = await Product.find({ stock: { $lt: 30 } });
+
+        // Truyền dữ liệu vào view
+        res.render('layout', {
+            content: 'pages/overview',
+            employeeId,
+            role: req.session.role,
+            todayRevenue,
+            bestSellingProduct, // Truyền sản phẩm bán chạy nhất
+            maxQuantity, // Số lượng bán được của sản phẩm bán chạy nhất
+            selectedDate,
+            lowStockProducts, // Truyền danh sách sản phẩm gần hết hàng
+            bills,
+            newOrders // Thêm danh sách đơn hàng mới
+        });
+
+    } catch (err) {
+        console.error('Error fetching bills:', err);
+        res.status(500).send('Có lỗi khi lấy danh sách hoá đơn.');
+    }
+});
+
+       
+
+//route cho settings page
+router.get('/settings',isAuthenticated, (req, res) => {
     const { employeeId, role } = req.session;
 
     res.render('layout', {
-        content: 'pages/overview',
+        content: 'pages/settingpage',
         employeeId,
         role
     });

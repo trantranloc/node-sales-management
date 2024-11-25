@@ -161,6 +161,7 @@
 
                 </tbody>
             </table>
+            
         </div>
     </div>
     <!-- Hiển thị chi tiết đơn hàng   -->
@@ -255,6 +256,7 @@
 
 
                                             <!-- Thêm nhiều dòng hơn ở đây -->
+                                             
                                 </tbody>
                             </table>
                         </div>
@@ -285,8 +287,15 @@
                     </div>
                 </div>
             </div>
+            
         </div>
         <% }) %>
+
+
+        <h3 style="margin-left:30px;">
+            Doanh thu: 
+            <%= bills.reduce((total, bill) => total + bill.totalAmount, 0).toLocaleString() %> VNĐ
+        </h3>
 
 
 
