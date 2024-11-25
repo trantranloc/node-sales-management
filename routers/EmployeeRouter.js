@@ -2,10 +2,10 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const Employee = require('../models/Employee');
-const { isAuthenticated } = require('../middlewares/authMiddleware');
+const { isAuthenticated, isAdmin } = require('../middlewares/authMiddleware');
 
 // Route: Lấy danh sách nhân viên
-router.get('/', isAuthenticated, async (req, res) => {
+router.get('/', isAuthenticated, isAdmin, async (req, res) => {
     try {
         const employees = await Employee.find();
         res.render('layout', { content: 'pages/employees', employees });
@@ -140,6 +140,22 @@ router.post('/change-password/:employeeId', isAuthenticated, async (req, res) =>
         res.status(500).send('Lỗi khi thay đổi mật khẩu');
     }
 });
+// Route: Đặt lại mật khẩu ban đầu 123456
+router.post('/reset-password/:employeeId', isAuthenticated, async (req, res) => {
+    try {
+        const { employeeId } = req.params; // Lấy employeeId từ URL params
+        const employee = await Employee.findById(employeeId);
+        if (!employee) return res.status(404).send('Nhân viên không tồn tại');
+        const hashedPassword = await bcrypt.hash('123456', 10);
+        employee.password = hashedPassword;
+        await employee.save();
+        res.redirect(`/employees`);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Lỗi khi đặt lại mật khẩu');
+    }
+});
+
 
 // Router: Cập nhật lại mật khẩu thành mạc định
 router.post('/reset-password/:employeeId', isAuthenticated, async (req, res) => {

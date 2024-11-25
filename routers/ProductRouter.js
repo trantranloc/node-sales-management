@@ -3,7 +3,7 @@ const Product = require('../models/Product');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const isAuthenticated = require('../middlewares/authMiddleware');
+const { isAuthenticated, isAdmin } = require('../middlewares/authMiddleware');
 
 const router = express.Router();
 
@@ -35,7 +35,7 @@ const upload = multer({
 });
 
 // Route: Danh sách sản phẩm 
-router.get('/', isAuthenticated, async (req, res) => {
+router.get('/', isAuthenticated,isAdmin, async (req, res) => {
     try {
         const products = await Product.find();
         res.render('layout', { content: 'pages/products', products });

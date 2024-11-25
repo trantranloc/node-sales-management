@@ -1,7 +1,7 @@
 const express = require('express');
 const Employee = require('../models/Employee');
 const bcrypt = require('bcrypt');
-const isAuthenticated = require('../middlewares/authMiddleware');
+const { isAuthenticated, isAdmin } = require('../middlewares/authMiddleware');
 const router = express.Router();
 
 
@@ -113,8 +113,6 @@ router.get('/', isAuthenticated, async (req, res) => {
         res.status(500).send('Có lỗi khi lấy danh sách hoá đơn.');
     }
 });
-
-
 
 //route cho settings page
 router.get('/settings', isAuthenticated, (req, res) => {
