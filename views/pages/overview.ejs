@@ -9,7 +9,7 @@
                 <div class="card-body">
                     <h5>Doanh thu hôm nay</h5>
                     <p class="display-6">
-                        <%= todayRevenue.toLocaleString() %> VND
+                        <%= todayRevenue.toLocaleString() %> đ
                     </p>
                 </div>
             </div>
@@ -18,7 +18,7 @@
             <div class="card bg-info text-white">
                 <div class="card-body">
                     <h5>Lợi nhuận tháng</h5>
-                    <p class="display-6">150,000,000₫</p>
+                    <p class="display-6">0₫</p>
                 </div>
             </div>
         </div>
@@ -138,7 +138,7 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const monthlyLabels = ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
-        const monthlyData = [15000000, 20000000, 18000000, 22000000, 24000000, 300000000];
+        const monthlyData = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2043300];
 
         const ctxRevenue = document.getElementById('monthlyRevenueChart').getContext('2d');
         const monthlyRevenueChart = new Chart(ctxRevenue, {

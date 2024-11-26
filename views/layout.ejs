@@ -70,112 +70,67 @@
                             <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
                             Tổng quan
                         </a>
-                        <<<<<<< HEAD=======<div class="sb-sidenav-menu-heading">Chính
-                    </div>
-                    >>>>>>> 730980c4fb9b27266a6fd930943bbbdd34799ea9
-
-                    <div class="sb-sidenav-menu-heading">Chính</div>
-                    <a class="nav-link" href="/orders">
-                        <div class="sb-nav-link-icon"><i class="fas fa-shopping-cart"></i></div>
-                        Đơn hàng
-                    </a>
-                    <a class="nav-link" href="/bills">
-                        <div class="sb-nav-link-icon"><i class="fas fa-box"></i></div>
-                        Lịch sử đơn hàng
-                    </a>
-                    <% if (employeeId && role==="admin" ) { %>
-                        <a class="nav-link" href="/products">
-                            <div class="sb-nav-link-icon"><i class="fas fa-box"></i></div>
-                            Sản phẩm
+                        <div class="sb-sidenav-menu-heading">Chính</div>
+                        <a class="nav-link" href="/orders">
+                            <div class="sb-nav-link-icon"><i class="fas fa-shopping-cart"></i></div>
+                            Đơn hàng
                         </a>
-                        <% } %>
-                            <a class="nav-link" href="/customers">
-                                <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
-                                Khách hàng
+                        <a class="nav-link" href="/bills">
+                            <div class="sb-nav-link-icon"><i class="fas fa-box"></i></div>
+                            Lịch sử đơn hàng
+                        </a>
+                        <% if (employeeId && role==="admin" ) { %>
+                            <a class="nav-link" href="/products">
+                                <div class="sb-nav-link-icon"><i class="fas fa-box"></i></div>
+                                Sản phẩm
                             </a>
-                            <% if (employeeId && role==='admin' ) { %>
-                                <a class="nav-link" href="/employees">
-                                    <div class="sb-nav-link-icon"><i class="fas fa-user-tie"></i></div>
-                                    Nhân viên
+                            <% } %>
+                                <a class="nav-link" href="/customers">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
+                                    Khách hàng
                                 </a>
-                                <% } %>
-                                    <div class="sb-sidenav-menu-heading">Cài đặt</div>
-                                    <a class="nav-link" href="/settings">
-                                        <div class="sb-nav-link-icon"><i class="fas fa-cogs"></i></div>
-                                        Cài đặt
+                                <% if (employeeId && role==='admin' ) { %>
+                                    <a class="nav-link" href="/employees">
+                                        <div class="sb-nav-link-icon"><i class="fas fa-user-tie"></i></div>
+                                        Nhân viên
                                     </a>
-                                    <% if(employeeId){ %>
-                                        <div class="sb-sidenav-menu-heading">Đăng xuất</div>
-                                        <!-- Đăng xuất với màu đỏ -->
-                                        <a class="nav-link text-danger" href="/logout"
-                                            onclick="return confirm('Bạn thực sự muốn đăng xuất!')">
-                                            <div class="sb-nav-link-icon"><i class="fas fa-sign-out-alt"
-                                                    style="color:red"></i>
-                                            </div>
-                                            Đăng xuất
+                                    <% } %>
+                                        <div class="sb-sidenav-menu-heading">Cài đặt</div>
+                                        <a class="nav-link" href="/settings">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-cogs"></i></div>
+                                            Cài đặt
                                         </a>
-                                        <% }else{ %>
-                                            <div class="sb-sidenav-menu-heading">Đăng nhập</div>
+                                        <% if(employeeId){ %>
+                                            <div class="sb-sidenav-menu-heading">Đăng xuất</div>
                                             <!-- Đăng xuất với màu đỏ -->
-                                            <a class="nav-link text-success" href="/login">
+                                            <a class="nav-link text-danger" href="/logout"
+                                                onclick="return confirm('Bạn thực sự muốn đăng xuất!')">
                                                 <div class="sb-nav-link-icon"><i class="fas fa-sign-out-alt"
-                                                        style="color:green"></i></div>
-                                                Đăng nhập
+                                                        style="color:red"></i>
+                                                </div>
+                                                Đăng xuất
                                             </a>
-                                            <% } %>
-                                                =======
-                                                <a class="nav-link" href="/customers">
-                                                    <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
-                                                    Khách hàng
+                                            <% }else{ %>
+                                                <div class="sb-sidenav-menu-heading">Đăng nhập</div>
+                                                <!-- Đăng xuất với màu đỏ -->
+                                                <a class="nav-link text-success" href="/login">
+                                                    <div class="sb-nav-link-icon"><i class="fas fa-sign-out-alt"
+                                                            style="color:green"></i></div>
+                                                    Đăng nhập
                                                 </a>
-                                                <% if (employeeId && role==="admin" ) { %>
-                                                    <a class="nav-link" href="/employees">
-                                                        <div class="sb-nav-link-icon"><i class="fas fa-user-tie"></i>
-                                                        </div>
-                                                        Nhân viên
-                                                    </a>
-                                                    <% } %>
-
-                                                        <div class="sb-sidenav-menu-heading">Cài đặt</div>
-                                                        <a class="nav-link" href="/settings">
-                                                            <div class="sb-nav-link-icon"><i class="fas fa-cogs"></i>
-                                                            </div>
-                                                            Cài đặt
-                                                        </a>
-                                                        <% if(employeeId){ %>
-                                                            <div class="sb-sidenav-menu-heading">Đăng xuất</div>
-                                                            <!-- Đăng xuất với màu đỏ -->
-                                                            <a class="nav-link text-danger" href="/logout"
-                                                                onclick="return confirm('Bạn thực sự muốn đăng xuất!')">
-                                                                <div class="sb-nav-link-icon"><i
-                                                                        class="fas fa-sign-out-alt"
-                                                                        style="color:red"></i>
-                                                                </div>
-                                                                Đăng xuất
-                                                            </a>
-                                                            <% }else{ %>
-                                                                <div class="sb-sidenav-menu-heading">Đăng nhập</div>
-                                                                <!-- Đăng xuất với màu đỏ -->
-                                                                <a class="nav-link text-success" href="/login">
-                                                                    <div class="sb-nav-link-icon"><i
-                                                                            class="fas fa-sign-out-alt"
-                                                                            style="color:green"></i></div>
-                                                                    Đăng nhập
-                                                                </a>
-                                                                <% } %>
-                                                                    >>>>>>> 730980c4fb9b27266a6fd930943bbbdd34799ea9
+                                                <% } %>
+                    </div>
                 </div>
+
+            </nav>
         </div>
 
-        </nav>
-    </div>
-
-    <!-- Vùng nội dung chính -->
-    <div id="layoutSidenav_content">
-        <main>
-            <%- include(content) %>
-        </main>
-    </div>
+        <!-- Vùng nội dung chính -->
+        <div id="layoutSidenav_content">
+            <main>
+                <%- include(content) %>
+            </main>
+        </div>
     </div>
 
 

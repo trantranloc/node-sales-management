@@ -64,7 +64,7 @@
                         </div>
                         <!-- Nút hành động -->
                         <div class="text-end p-4">
-                            <button data-bs-dismiss="modal" class="btn btn-secondary">Hủy</button>
+                            <button data-bs-dismiss="modal" type="button" class="btn btn-secondary">Hủy</button>
                             <button type="submit" class="btn btn-primary">Thêm sản phẩm</button>
                         </div>
                     </form>
@@ -72,39 +72,75 @@
             </div>
         </div>
     </div>
-    </tbody>
-    </table>
+    <!-- Sửa khách hàng  -->
+    <% customers.forEach(customer=>{ %>
+        <div class="modal fade" id="editCustomerModal" tabindex="-1" aria-labelledby="editCustomerModalLabel">
+            <div class="modal-dialog modal-dialog-scrollable modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addCustomerModalLabel">Thêm khách hàng</h5>
+                    </div>
+                    <div class="modal-body">
+                        <form action="/customers/edit/" method="post">
+                            <div class="row mb-3 ">
+                                <div class="col-6">
+                                    <strong class="m-2">Tên khách hàng</strong>
+                                    <input type="text" class="form-control" name="name" value="<%= customer.name %>">
+                                </div>
+                                <div class="col-6">
+                                    <strong class="m-2">Số điện thoại</strong>
+                                    <input type="text" class="form-control" name="phone" value="<%= customer.phone %>">
+                                </div>
+                            </div>
+                            <div class="row mb-3 ">
+                                <div class="col-6">
+                                    <strong class="m-2">Email</strong>
+                                    <input type="text" class="form-control" name="email" value="<%= customer.email %>">
+                                </div>
+                                <div class="col-6">
+                                    <strong class="m-2">Giảm giá</strong>
+                                    <input type="text" class="form-control" name="discount">
+                                </div>
+                            </div>
+                            <!-- Nút hành động -->
+                            <div class="text-end p-4">
+                                <button data-bs-dismiss="modal" type="button" class="btn btn-secondary">Hủy</button>
+                                <button type="submit" class="btn btn-primary">Sửa thông tin</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <% }); %>
 
-    </div>
+            <script>
+                // Hàm tìm kiếm khách hàng
+                async function searchCustomer(query = '') {
+                    const resultContainerCustomer = document.getElementById('search-result-customers');
+                    try {
+                        // Thực hiện fetch với query
+                        const response = await fetch(`/customers/search${query.trim() ? `?q=${query}` : ''}`);
+                        const customers = await response.json();
 
-
-    <script>
-        // Hàm tìm kiếm khách hàng
-        async function searchCustomer(query = '') {
-            const resultContainerCustomer = document.getElementById('search-result-customers');
-            try {
-                // Thực hiện fetch với query
-                const response = await fetch(`/customers/search${query.trim() ? `?q=${query}` : ''}`);
-                const customers = await response.json();
-
-                // Hiển thị kết quả tìm kiếm
-                resultContainerCustomer.innerHTML = customers.length
-                    ? customers.map((customer,index) => `
+                        // Hiển thị kết quả tìm kiếm
+                        resultContainerCustomer.innerHTML = customers.length
+                            ? customers.map((customer, index) => `
                     <tr>
-                        <td>${index+1}</td>
+                        <td>${index + 1}</td>
                         <td>${customer.name}</td>
                         <td>${customer.email}</td>
                         <td>${customer.phone}</td>
                         <td>${customer.purchase ? customer.purchase : 0}</td>
                         <td>${(customer.total ? customer.total : 0).toLocaleString()}đ</td>
                         <td class="d-flex justify-content-around gap-1 h-100">
-                            <a href="customers/update/${customer.id}" class="btn btn-warning btn-sm w-100">
+                            <button data-bs-toggle="modal" data-bs-target="#editCustomerModal" class="btn btn-warning btn-sm w-100">
                                 <i class="fas fa-edit d-none d-sm-inline"></i>
                                 <span class="d-none d-sm-inline">Sửa</span>
                                 <i class="fas fa-edit d-sm-none"></i>
-                            </a>
-                            <a href="customers/delete/${customer.id}" class="btn btn-danger btn-sm w-100"
-                            onclick="return confirm('Bạn có chắc chắn muốn xóa nhân viên này?');">
+                            </button>
+                            <a href="customers/delete/${customer._id}" class="btn btn-danger btn-sm w-100"
+                            onclick="return confirm('Bạn có chắc chắn muốn xóa khách hàng này này?');">
                                 <i class="fas fa-trash-alt d-none d-sm-inline"></i>
                                 <span class="d-none d-sm-inline">Xóa</span>
                                 <i class="fas fa-trash-alt d-sm-none"></i>
@@ -112,21 +148,21 @@
                         </td>
                     </tr>
                 `).join('')
-                    : ' ';
-            } catch (error) {
-                console.error('Lỗi khi tìm kiếm khách hàng:', error);
-                resultContainerCustomer.innerHTML = '<p class="p-2 text-danger">Có lỗi xảy ra khi tải dữ liệu.</p>';
-            }
-        }
+                            : ' ';
+                    } catch (error) {
+                        console.error('Lỗi khi tìm kiếm khách hàng:', error);
+                        resultContainerCustomer.innerHTML = '<p class="p-2 text-danger">Có lỗi xảy ra khi tải dữ liệu.</p>';
+                    }
+                }
 
-        // Gọi hàm tìm kiếm ngay khi trang được tải với query mặc định là rỗng
-        document.addEventListener('DOMContentLoaded', () => {
-            searchCustomer(''); // Truyền giá trị rỗng để hiển thị tất cả khách hàng khi tải trang
-        });
-    </script>
+                // Gọi hàm tìm kiếm ngay khi trang được tải với query mặc định là rỗng
+                document.addEventListener('DOMContentLoaded', () => {
+                    searchCustomer(''); // Truyền giá trị rỗng để hiển thị tất cả khách hàng khi tải trang
+                });
+            </script>
 
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 
