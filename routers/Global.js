@@ -174,3 +174,28 @@ router.get('/logout', (req, res) => {
 });
 
 module.exports = router;
+
+// Hàm tạo tài khoản admin
+async function createAdminAccount() {
+    try {
+        const existingAdmin = await Employee.findOne({ email: 'admin@gmail.com' });
+        if (!existingAdmin) {
+            const hashedPassword = await bcrypt.hash('admin123', 10); // Băm mật khẩu
+            const admin = new Employee({
+                name: 'Admin',
+                email: 'admin@gmail.com',
+                password: hashedPassword,
+                role: 'admin' // Vai trò admin
+            });
+            await admin.save();
+            console.log('Tài khoản admin đã được tạo thành công.');
+        } else {
+            console.log('Tài khoản admin đã tồn tại.');
+        }
+    } catch (err) {
+        console.error('Lỗi khi tạo tài khoản admin:', err);
+    }
+}
+
+// Gọi hàm khi khởi động ứng dụng
+createAdminAccount();

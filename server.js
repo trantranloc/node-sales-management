@@ -8,12 +8,12 @@ const cors = require('cors');
 const app = express();
 
 // Cổng cho server
-const port = 3000;
+const port = 3001;
 
 // Kết nối với MongoDB
 mongoose.connect('mongodb://localhost:27017/crud', { useNewUrlParser: true })
-    .then(() => console.log('Connected to MongoDB'))
-    .catch(err => console.error('Failed to connect to MongoDB', err));
+    .then(() => console.log('Kết nối thành công MongoDB'))
+    .catch(err => console.error('Kết nối thất bại MongoDB', err));
 
 // CORS cho phép yêu cầu từ các nguồn khác nhau
 app.use(cors());
