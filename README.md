@@ -4,7 +4,6 @@
 ## Introduction
 This project is an application for managing invoices and employees, built on Node.js and Express. The application supports features such as displaying invoice lists, managing employees (add, update, delete, view details), and user management through login and registration systems.
 
----
 
 ## Directory Structure
 ```
